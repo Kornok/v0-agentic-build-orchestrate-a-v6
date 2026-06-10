@@ -356,7 +356,7 @@ export default function AgenticPage() {
             Join today.
           </h2>
           <p className="text-sm text-black/45 leading-relaxed mb-10">
-            Join leading enterprises orchestrating intelligent AI agents for mission-critical automation.
+            Manage, Innovate, Create
           </p>
           {!submitted ? (
             <form
