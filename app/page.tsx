@@ -152,27 +152,7 @@ export default function AgenticPage() {
             Coordinate AI<br />agents to complete<br />complex tasks<br />autonomously.
           </h1>
 
-          {/* 3 metrics — staggered after title */}
-          <div className="flex gap-8 sm:gap-12">
-            {[
-              { value: "50M+", label: "Tasks" },
-              { value: "99.9%", label: "Uptime" },
-              { value: "180+", label: "Countries" },
-            ].map((stat, i) => (
-              <div
-                key={i}
-                style={{
-                  opacity: heroReady ? 1 : 0,
-                  filter: heroReady ? "blur(0px)" : "blur(16px)",
-                  transform: heroReady ? "translateY(0px)" : "translateY(20px)",
-                  transition: `opacity 0.8s cubic-bezier(0.16,1,0.3,1) ${120 + i * 80}ms, filter 0.8s cubic-bezier(0.16,1,0.3,1) ${120 + i * 80}ms, transform 0.8s cubic-bezier(0.16,1,0.3,1) ${120 + i * 80}ms`,
-                }}
-              >
-                <div className="text-3xl sm:text-4xl text-[#111] font-light tracking-tight" style={{ fontFamily: '"IBM Plex Sans", sans-serif' }}>{stat.value}</div>
-                <div className="text-xs text-black/40 tracking-widest uppercase mt-1" style={{ fontFamily: '"IBM Plex Sans", sans-serif' }}>{stat.label}</div>
-              </div>
-            ))}
-          </div>
+
         </div>
       </section>
 
@@ -367,6 +347,21 @@ export default function AgenticPage() {
                 Discover how AI agents are assisting people with everyday tasks, complex work, and challenges that matter most.
               </p>
 
+              {/* AI Impact Stats */}
+              <div className="mt-12 space-y-4">
+                <div>
+                  <div className="text-lg font-light text-[#111] mb-1">800+</div>
+                  <div className="text-xs text-black/40 tracking-widest uppercase">Teams Empowered</div>
+                </div>
+                <div>
+                  <div className="text-lg font-light text-[#111] mb-1">10K+</div>
+                  <div className="text-xs text-black/40 tracking-widest uppercase">Tasks Completed Daily</div>
+                </div>
+                <div>
+                  <div className="text-lg font-light text-[#111] mb-1">24/7</div>
+                  <div className="text-xs text-black/40 tracking-widest uppercase">Always Available</div>
+                </div>
+              </div>
             </div>
             <div className="relative">
               <LiveAgentFeed />
@@ -458,17 +453,7 @@ export default function AgenticPage() {
             ))}
           </div>
 
-          {/* Legal links */}
-          <div className="flex items-center gap-6">
-            {[
-              { label: "Privacy", href: "#" },
-              { label: "Terms",   href: "#" },
-              { label: "Docs",    href: "#" },
-              { label: "GitHub",  href: "#" },
-            ].map(l => (
-              <a key={l.label} href={l.href} className="text-xs text-black/25 hover:text-black/55 transition-colors tracking-widest">{l.label}</a>
-            ))}
-          </div>
+
         </div>
         <div className="max-w-6xl mx-auto mt-8 pt-6 border-t border-black/[0.04]">
           <span className="text-xs text-black/20">© 2026 Nexus AI. All rights reserved.</span>
