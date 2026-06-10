@@ -4,7 +4,7 @@ import React, { useRef, useEffect, useState, useCallback } from "react"
 import { IntroAnimation, INTRO_DURATION_MS, HERO_REVEAL_MS } from "@/components/intro-animation"
 import { AgentInterface } from "@/components/agent-interface"
 import { PixelIcon } from "@/components/pixel-icon"
-import { LiveAgentFeed, LiveAgentCounter } from "@/components/live-agent-feed"
+
 import { RevealText } from "@/components/reveal-text"
 import { StackingAgentCards } from "@/components/stacking-agent-cards"
 import { MobileNav } from "@/components/mobile-nav"
@@ -346,25 +346,6 @@ export default function AgenticPage() {
               <p className="mt-6 text-base text-black/40 leading-relaxed max-w-sm">
                 Discover how AI agents are assisting people with everyday tasks, complex work, and challenges that matter most.
               </p>
-
-              {/* AI Impact Stats */}
-              <div className="mt-12 space-y-4">
-                <div>
-                  <div className="text-lg font-light text-[#111] mb-1">800+</div>
-                  <div className="text-xs text-black/40 tracking-widest uppercase">Teams Empowered</div>
-                </div>
-                <div>
-                  <div className="text-lg font-light text-[#111] mb-1">10K+</div>
-                  <div className="text-xs text-black/40 tracking-widest uppercase">Tasks Completed Daily</div>
-                </div>
-                <div>
-                  <div className="text-lg font-light text-[#111] mb-1">24/7</div>
-                  <div className="text-xs text-black/40 tracking-widest uppercase">Always Available</div>
-                </div>
-              </div>
-            </div>
-            <div className="relative">
-              <LiveAgentFeed />
             </div>
           </div>
         </div>
