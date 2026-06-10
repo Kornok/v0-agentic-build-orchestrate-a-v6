@@ -228,6 +228,38 @@ export default function AgenticPage() {
               <h3 className="text-lg font-light mb-2">Guardrails & Permissions</h3>
               <p className="text-sm text-black/45 leading-relaxed">Define what agents can and cannot do. Fine-grained access control per tool.</p>
             </BentoCard>
+
+            <BentoCard className="col-span-12 md:col-span-3 p-8 min-h-[200px]" delay={240}>
+              <div className="w-10 h-10 rounded-xl border border-black/10 flex items-center justify-center mb-5">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+              </div>
+              <h3 className="text-lg font-light mb-2">Unleash full power of AI</h3>
+              <p className="text-sm text-black/45 leading-relaxed">Unlock unlimited potential with advanced AI capabilities and seamless integrations.</p>
+            </BentoCard>
+
+            <BentoCard className="col-span-12 md:col-span-3 p-8 min-h-[200px]" delay={280}>
+              <div className="w-10 h-10 rounded-xl border border-black/10 flex items-center justify-center mb-5">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              </div>
+              <h3 className="text-lg font-light mb-2">Manage time</h3>
+              <p className="text-sm text-black/45 leading-relaxed">Smart scheduling and automation to save hours. Prioritize what matters most.</p>
+            </BentoCard>
+
+            <BentoCard className="col-span-12 md:col-span-3 p-8 min-h-[200px]" delay={320}>
+              <div className="w-10 h-10 rounded-xl border border-black/10 flex items-center justify-center mb-5">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+              </div>
+              <h3 className="text-lg font-light mb-2">Voice assistance for accessibility</h3>
+              <p className="text-sm text-black/45 leading-relaxed">Hands-free control and voice commands for seamless accessibility and ease of use.</p>
+            </BentoCard>
+
+            <BentoCard className="col-span-12 md:col-span-3 p-8 min-h-[200px]" delay={360}>
+              <div className="w-10 h-10 rounded-xl border border-black/10 flex items-center justify-center mb-5">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/><polyline points="10 12 14 16 10 20"/></svg>
+              </div>
+              <h3 className="text-lg font-light mb-2">All in one AI assistant</h3>
+              <p className="text-sm text-black/45 leading-relaxed">Complete AI-powered platform combining all your needs in a single unified interface.</p>
+            </BentoCard>
           </div>
         </div>
       </section>
@@ -382,7 +414,7 @@ export default function AgenticPage() {
         />
         <div className="relative z-10 max-w-2xl mx-auto text-center">
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-light tracking-tight leading-[1.05] mb-6">
-            Deploy your AI<br />mission control center.
+            Join today.
           </h2>
           <p className="text-sm text-black/45 leading-relaxed mb-10">
             Join leading enterprises orchestrating intelligent AI agents for mission-critical automation.
