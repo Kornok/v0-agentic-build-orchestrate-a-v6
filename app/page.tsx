@@ -381,12 +381,12 @@ export default function AgenticPage() {
           }}
         />
         <div className="relative z-10 max-w-2xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-light tracking-tight leading-[1.05] mb-6">
-            Deploy your AI<br />mission control center.
-          </h2>
-          <p className="text-sm text-black/45 leading-relaxed mb-10">
-            Join leading enterprises orchestrating intelligent AI agents for mission-critical automation.
-          </p>
+  <h2 className="text-4xl md:text-5xl lg:text-6xl font-light tracking-tight leading-[1.05] mb-6">
+  Join Today.
+  </h2>
+  <p className="text-sm text-black/45 leading-relaxed mb-10">
+  today , manage , create
+  </p>
           {!submitted ? (
             <form
               onSubmit={e => { e.preventDefault(); if (email) setSubmitted(true) }}
