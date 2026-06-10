@@ -163,7 +163,7 @@ export default function AgenticPage() {
             <PixelIcon type="platform" size={40} />
             <div className="mt-4"><Tag>PLATFORM</Tag></div>
             <RevealText className="mt-5 text-4xl md:text-5xl lg:text-6xl font-light tracking-tight leading-[1.05]">
-              {"Make your life better"}
+              {"Advanced orchestration\nfor AI agents."}
             </RevealText>
           </div>
 
@@ -197,9 +197,9 @@ export default function AgenticPage() {
                 <div className="w-10 h-10 rounded-xl border border-black/10 bg-white/60 flex items-center justify-center mb-6" style={{ backdropFilter: "blur(8px)" }}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><path d="m4.93 4.93 2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"/></svg>
                 </div>
-                <h3 className="text-xl font-light mb-3">AI voice assistant</h3>
+                <h3 className="text-xl font-light mb-3">Visual Agent Builder</h3>
                 <p className="text-sm text-black/45 leading-relaxed max-w-sm">
-                  Interact with AI hands-free through natural voice commands. Get instant answers and control your tasks by simply speaking.
+                  Drag, connect, and configure agents through an intuitive graph editor. No boilerplate. Ship in minutes, not days.
                 </p>
               </div>
             </BentoCard>
@@ -209,24 +209,24 @@ export default function AgenticPage() {
               <div className="w-10 h-10 rounded-xl border border-black/10 flex items-center justify-center mb-5">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
               </div>
-              <h3 className="text-lg font-light mb-2">Time manager</h3>
-              <p className="text-sm text-black/45 leading-relaxed">Schedule your day intelligently and stay on track. Never miss deadlines with smart reminders and auto-optimization.</p>
+              <h3 className="text-lg font-light mb-2">Real-time Monitoring</h3>
+              <p className="text-sm text-black/45 leading-relaxed">Trace every decision. Debug with full execution history and live logs.</p>
             </BentoCard>
 
             <BentoCard className="col-span-12 md:col-span-4 p-8 min-h-[200px]" delay={160}>
               <div className="w-10 h-10 rounded-xl border border-black/10 flex items-center justify-center mb-5">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 10h8M8 14h5"/></svg>
               </div>
-              <h3 className="text-lg font-light mb-2">Unleashing full power of AI practically</h3>
-              <p className="text-sm text-black/45 leading-relaxed">Harness cutting-edge AI for real-world problems. From research to creative projects, get results that matter.</p>
+              <h3 className="text-lg font-light mb-2">Memory & Context</h3>
+              <p className="text-sm text-black/45 leading-relaxed">Persistent long-term memory across sessions. Agents learn from every interaction.</p>
             </BentoCard>
 
             <BentoCard className="col-span-12 md:col-span-4 p-8 min-h-[200px]" delay={200}>
               <div className="w-10 h-10 rounded-xl border border-black/10 flex items-center justify-center mb-5">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
               </div>
-              <h3 className="text-lg font-light mb-2">Useful for the youth</h3>
-              <p className="text-sm text-black/45 leading-relaxed">Perfect for students and young professionals. Boost productivity and ace assignments with AI-powered support.</p>
+              <h3 className="text-lg font-light mb-2">Guardrails & Permissions</h3>
+              <p className="text-sm text-black/45 leading-relaxed">Define what agents can and cannot do. Fine-grained access control per tool.</p>
             </BentoCard>
           </div>
         </div>
@@ -381,12 +381,12 @@ export default function AgenticPage() {
           }}
         />
         <div className="relative z-10 max-w-2xl mx-auto text-center">
-  <h2 className="text-4xl md:text-5xl lg:text-6xl font-light tracking-tight leading-[1.05] mb-6">
-  Join Today.
-  </h2>
-  <p className="text-sm text-black/45 leading-relaxed mb-10">
-  today , manage , create
-  </p>
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-light tracking-tight leading-[1.05] mb-6">
+            Deploy your AI<br />mission control center.
+          </h2>
+          <p className="text-sm text-black/45 leading-relaxed mb-10">
+            Join leading enterprises orchestrating intelligent AI agents for mission-critical automation.
+          </p>
           {!submitted ? (
             <form
               onSubmit={e => { e.preventDefault(); if (email) setSubmitted(true) }}

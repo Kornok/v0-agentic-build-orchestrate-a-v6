@@ -1,12 +1,8 @@
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+import { createClient } from '@/lib/supabase/server'
 
 export async function POST(request: Request) {
   try {
+    const supabase = await createClient()
     const { title, description, startTime, endTime, category, priority } = await request.json()
 
     if (!title || !startTime || !endTime) {
@@ -52,6 +48,7 @@ export async function POST(request: Request) {
 
 export async function GET() {
   try {
+    const supabase = await createClient()
     const { data, error } = await supabase
       .from('schedules')
       .select('*')
@@ -76,6 +73,7 @@ export async function GET() {
 
 export async function PUT(request: Request) {
   try {
+    const supabase = await createClient()
     const { id, completed } = await request.json()
 
     if (!id) {
@@ -110,6 +108,7 @@ export async function PUT(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    const supabase = await createClient()
     const { id } = await request.json()
 
     if (!id) {

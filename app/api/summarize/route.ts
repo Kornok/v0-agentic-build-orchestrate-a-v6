@@ -1,14 +1,10 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 import { generateText } from 'ai'
 import { openai } from '@ai-sdk/openai'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
-
 export async function POST(request: Request) {
   try {
+    const supabase = await createClient()
     const { text, summaryLength = 'medium' } = await request.json()
 
     if (!text || text.trim().length === 0) {
@@ -73,6 +69,7 @@ Please provide a clear, concise summary that captures the main points.`
 
 export async function GET() {
   try {
+    const supabase = await createClient()
     const { data, error } = await supabase
       .from('document_summaries')
       .select('*')

@@ -1,11 +1,6 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 import { generateText } from 'ai'
 import { openai } from '@ai-sdk/openai'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
 
 const SUPPORTED_LANGUAGES = {
   en: 'English',
@@ -24,6 +19,7 @@ const SUPPORTED_LANGUAGES = {
 
 export async function POST(request: Request) {
   try {
+    const supabase = await createClient()
     const { text, sourceLanguage, targetLanguage } = await request.json()
 
     if (!text || text.trim().length === 0) {
@@ -99,6 +95,7 @@ ${text}`
 
 export async function GET() {
   try {
+    const supabase = await createClient()
     const { data, error } = await supabase
       .from('translations')
       .select('*')

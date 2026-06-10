@@ -1,11 +1,6 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 import { generateText } from 'ai'
 import { openai } from '@ai-sdk/openai'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
 
 const REPORT_TYPES = {
   summary: 'Executive Summary',
@@ -17,6 +12,7 @@ const REPORT_TYPES = {
 
 export async function POST(request: Request) {
   try {
+    const supabase = await createClient()
     const { title, content, reportType } = await request.json()
 
     if (!title || !content) {
@@ -75,6 +71,7 @@ Please format the report professionally with sections, bullet points, and clear 
 
 export async function GET() {
   try {
+    const supabase = await createClient()
     const { data, error } = await supabase
       .from('reports')
       .select('*')
@@ -103,6 +100,7 @@ export async function GET() {
 
 export async function DELETE(request: Request) {
   try {
+    const supabase = await createClient()
     const { id } = await request.json()
 
     if (!id) {
