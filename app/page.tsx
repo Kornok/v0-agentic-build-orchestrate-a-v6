@@ -163,7 +163,7 @@ export default function AgenticPage() {
             <PixelIcon type="platform" size={40} />
             <div className="mt-4"><Tag>PLATFORM</Tag></div>
             <RevealText className="mt-5 text-4xl md:text-5xl lg:text-6xl font-light tracking-tight leading-[1.05]">
-              {"Advanced orchestration\nfor AI agents."}
+              {"Benefits"}
             </RevealText>
           </div>
 
