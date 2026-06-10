@@ -199,7 +199,7 @@ export default function AgenticPage() {
                 </div>
                 <h3 className="text-xl font-light mb-3">AI voice assistant</h3>
                 <p className="text-sm text-black/45 leading-relaxed max-w-sm">
-                  Drag, connect, and configure agents through an intuitive graph editor. No boilerplate. Ship in minutes, not days.
+                  Interact with AI hands-free through natural voice commands. Get instant answers and control your tasks by simply speaking.
                 </p>
               </div>
             </BentoCard>
@@ -210,7 +210,7 @@ export default function AgenticPage() {
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
               </div>
               <h3 className="text-lg font-light mb-2">Time manager</h3>
-              <p className="text-sm text-black/45 leading-relaxed">Trace every decision. Debug with full execution history and live logs.</p>
+              <p className="text-sm text-black/45 leading-relaxed">Schedule your day intelligently and stay on track. Never miss deadlines with smart reminders and auto-optimization.</p>
             </BentoCard>
 
             <BentoCard className="col-span-12 md:col-span-4 p-8 min-h-[200px]" delay={160}>
@@ -218,7 +218,7 @@ export default function AgenticPage() {
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 10h8M8 14h5"/></svg>
               </div>
               <h3 className="text-lg font-light mb-2">Unleashing full power of AI practically</h3>
-              <p className="text-sm text-black/45 leading-relaxed">Persistent long-term memory across sessions. Agents learn from every interaction.</p>
+              <p className="text-sm text-black/45 leading-relaxed">Harness cutting-edge AI for real-world problems. From research to creative projects, get results that matter.</p>
             </BentoCard>
 
             <BentoCard className="col-span-12 md:col-span-4 p-8 min-h-[200px]" delay={200}>
@@ -226,7 +226,7 @@ export default function AgenticPage() {
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
               </div>
               <h3 className="text-lg font-light mb-2">Useful for the youth</h3>
-              <p className="text-sm text-black/45 leading-relaxed">Define what agents can and cannot do. Fine-grained access control per tool.</p>
+              <p className="text-sm text-black/45 leading-relaxed">Perfect for students and young professionals. Boost productivity and ace assignments with AI-powered support.</p>
             </BentoCard>
           </div>
         </div>
