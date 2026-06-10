@@ -11,21 +11,21 @@ const _courierPrime = Courier_Prime({ weight: ["400", "700"], subsets: ["latin"]
 const _ibmPlexSans = IBM_Plex_Sans({ weight: ["300", "400", "500", "600"], subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Agentic — Autonomous AI Agents at Scale',
-  description: 'Deploy autonomous AI agents that think, act, and execute across any workflow. Connect 200+ integrations, run agents in parallel, and ship faster with the Agentic platform.',
-  keywords: ['AI agents', 'autonomous agents', 'LLM orchestration', 'AI automation', 'multi-agent platform'],
-  authors: [{ name: 'Agentic' }],
+  title: 'Nexus AI — Unified Agentic AI System',
+  description: 'Advanced agent orchestration system where multiple AI agents collaborate to complete complex tasks such as research, document generation, automation, analysis, and intelligent decision support.',
+  keywords: ['AI agents', 'agent orchestration', 'LLM coordination', 'AI automation', 'multi-agent system'],
+  authors: [{ name: 'Nexus AI' }],
   openGraph: {
-    title: 'Agentic — Autonomous AI Agents at Scale',
-    description: 'Deploy autonomous AI agents that think, act, and execute across any workflow.',
+    title: 'Nexus AI — Unified Agentic AI System',
+    description: 'Advanced agent orchestration system for complex AI task execution.',
     type: 'website',
-    url: 'https://agentic.ai',
-    siteName: 'Agentic',
+    url: 'https://nexusai.io',
+    siteName: 'Nexus AI',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Agentic — Autonomous AI Agents at Scale',
-    description: 'Deploy autonomous AI agents that think, act, and execute across any workflow.',
+    title: 'Nexus AI — Unified Agentic AI System',
+    description: 'Advanced agent orchestration system where multiple AI agents collaborate to complete complex tasks.',
   },
   icons: {
     icon: [

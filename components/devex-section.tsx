@@ -10,11 +10,11 @@ const STEPS = [
     file: "terminal",
     lang: "bash",
     code: [
-      { type: "comment", text: "# Install the Agentic SDK" },
-      { type: "command", text: "npm install @agentic/sdk" },
+      { type: "comment", text: "# Install the Nexus AI SDK" },
+      { type: "command", text: "npm install @nexus-ai/sdk" },
       { type: "gap" },
       { type: "comment", text: "# Initialize your project" },
-      { type: "command", text: "npx agentic init" },
+      { type: "command", text: "npx nexus-ai init" },
       { type: "gap" },
       { type: "output", text: "✓ Project initialized" },
       { type: "output", text: "✓ Config file created" },
@@ -29,7 +29,7 @@ const STEPS = [
     lang: "typescript",
     code: [
       { type: "comment", text: "// agents/researcher.ts" },
-      { type: "keyword", text: "import", after: " { Agent, Tool } ", keyword2: "from", string: " '@agentic/sdk'" },
+      { type: "keyword", text: "import", after: " { Agent, Tool } ", keyword2: "from", string: " '@nexus-ai/sdk'" },
       { type: "gap" },
       { type: "keyword", text: "const", after: " webSearch ", keyword2: "=", keyword3: " new ", fn: "Tool", args: "('web-search', async (q) => { ... })" },
       { type: "gap" },
@@ -49,7 +49,7 @@ const STEPS = [
     lang: "typescript",
     code: [
       { type: "comment", text: "// Add long-term memory to any agent" },
-      { type: "keyword", text: "import", after: " { VectorMemory } ", keyword2: "from", string: " '@agentic/memory'" },
+      { type: "keyword", text: "import", after: " { VectorMemory } ", keyword2: "from", string: " '@nexus-ai/memory'" },
       { type: "gap" },
       { type: "keyword", text: "const", after: " memory ", keyword2: "=", keyword3: " new ", fn: "VectorMemory", args: "({" },
       { type: "prop", key: "  provider", val: "'pgvector'" },
@@ -60,22 +60,22 @@ const STEPS = [
       { type: "plain", text: "researcher.use(memory)" },
     ],
   },
-  {
+    {
     num: "04",
     title: "Deploy",
     desc: "One command to production",
     file: "terminal",
     lang: "bash",
     code: [
-      { type: "comment", text: "# Deploy to Agentic Cloud" },
-      { type: "command", text: "agentic deploy --prod" },
+      { type: "comment", text: "# Deploy to Nexus Cloud" },
+      { type: "command", text: "nexus-ai deploy --prod" },
       { type: "gap" },
       { type: "output", text: "  Building agent..." },
       { type: "output", text: "  Running tests..." },
       { type: "output", text: "  Deploying to edge..." },
       { type: "gap" },
       { type: "success", text: "✓ researcher deployed" },
-      { type: "url", text: "  → https://agents.agentic.dev/researcher" },
+      { type: "url", text: "  → https://agents.nexus-ai.cloud/researcher" },
     ],
   },
 ]
@@ -150,7 +150,7 @@ export function DevExSection() {
             Developer Experience
           </div>
           <h2 className="mt-5 text-4xl md:text-5xl font-light tracking-tight leading-[1.05]">
-            Built for developers.<br />Loved by teams.
+            Enterprise-grade framework.<br />Developer-friendly tools.
           </h2>
         </div>
 

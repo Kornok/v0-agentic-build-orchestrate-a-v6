@@ -149,7 +149,7 @@ export default function AgenticPage() {
               transition: "opacity 1s cubic-bezier(0.16,1,0.3,1) 0ms, filter 1s cubic-bezier(0.16,1,0.3,1) 0ms, transform 1s cubic-bezier(0.16,1,0.3,1) 0ms",
             }}
           >
-            Build &amp;<br />orchestrate AI<br />agents while<br />you sleep.
+            Coordinate AI<br />agents to complete<br />complex tasks<br />autonomously.
           </h1>
 
           {/* 3 metrics — staggered after title */}
@@ -183,7 +183,7 @@ export default function AgenticPage() {
             <PixelIcon type="platform" size={40} />
             <div className="mt-4"><Tag>PLATFORM</Tag></div>
             <RevealText className="mt-5 text-4xl md:text-5xl lg:text-6xl font-light tracking-tight leading-[1.05]">
-              {"Everything you need\nto ship agents."}
+              {"Advanced orchestration\nfor AI agents."}
             </RevealText>
           </div>
 
@@ -260,7 +260,7 @@ export default function AgenticPage() {
               <PixelIcon type="agents" size={40} />
               <div className="mt-4"><Tag>AGENT TYPES</Tag></div>
               <RevealText className="mt-5 text-4xl md:text-5xl font-light tracking-tight leading-[1.05]">
-                {"Plug-and-play agents\nready to deploy."}
+                {"Specialized AI agents\nready to coordinate."}
               </RevealText>
             </div>
             <p className="text-sm text-black/45 leading-relaxed max-w-xs">
@@ -279,7 +279,7 @@ export default function AgenticPage() {
             <PixelIcon type="workflow" size={40} />
             <div className="mt-4"><Tag>WORKFLOW</Tag></div>
             <RevealText className="mt-5 text-4xl md:text-5xl font-light tracking-tight leading-[1.05]">
-              {"From idea to running agent\nin four steps."}
+              {"From concept to production\nintelligent workflow."}
             </RevealText>
           </div>
 
@@ -326,7 +326,7 @@ export default function AgenticPage() {
               <PixelIcon type="integrations" size={40} />
               <div className="mt-4"><Tag>INTEGRATIONS</Tag></div>
               <RevealText className="mt-5 text-4xl md:text-5xl font-light tracking-tight leading-[1.05]">
-                {"Connect any tool.\nControl any system."}
+                {"Integrate everything.\nAutomate anything."}
               </RevealText>
             </div>
             <p className="text-sm text-black/45 leading-relaxed max-w-xs">
@@ -388,7 +388,7 @@ export default function AgenticPage() {
         </div>
       </section>
 
-      {/* ── SECURITY & OBSERVABILITY ──────────────────────────────────��──── */}
+      {/* ── SECURITY & OBSERVABILITY ─────────────────────────────────�����──── */}
       <section id="security" className="py-32 px-6 md:px-12 lg:px-20 border-t border-black/[0.06]">
         <div className="max-w-6xl mx-auto">
           <div className="mb-16">
@@ -508,7 +508,7 @@ export default function AgenticPage() {
               <PixelIcon type="agents" size={40} />
               <div className="mt-4"><Tag>LIVE RIGHT NOW</Tag></div>
               <RevealText className="mt-5 text-4xl md:text-5xl lg:text-6xl font-light tracking-tight leading-[1.05]">
-                {"Agents working\n24 / 7, autonomously."}
+                {"AI agents executing\ncritical tasks 24/7."}
               </RevealText>
               <p className="mt-6 text-base text-black/40 leading-relaxed max-w-sm">
                 At any moment, thousands of agents are running tasks on behalf of teams around the world — no human in the loop.
@@ -532,7 +532,7 @@ export default function AgenticPage() {
             <PixelIcon type="pricing" size={40} />
             <div className="mt-4"><Tag>PRICING</Tag></div>
             <RevealText className="mt-5 text-4xl md:text-5xl font-light tracking-tight leading-[1.05]">
-              {"Pay as your agents grow."}
+              {"Scale your AI missions."}
             </RevealText>
           </div>
 
@@ -625,10 +625,10 @@ export default function AgenticPage() {
         />
         <div className="relative z-10 max-w-2xl mx-auto text-center">
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-light tracking-tight leading-[1.05] mb-6">
-            Start building your<br />agent workforce.
+            Deploy your AI<br />mission control center.
           </h2>
           <p className="text-sm text-black/45 leading-relaxed mb-10">
-            Join thousands of teams deploying AI agents that work around the clock, across every timezone.
+            Join leading enterprises orchestrating intelligent AI agents for mission-critical automation.
           </p>
           {!submitted ? (
             <form
@@ -663,7 +663,7 @@ export default function AgenticPage() {
       {/* ── FOOTER ────────────────────────────────────────────────────────── */}
       <footer className="py-10 px-6 md:px-12 lg:px-20 border-t border-black/[0.06]">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
-          <span className="font-pixel text-xs tracking-[0.25em] text-black/50">AGENTIC</span>
+          <span className="font-pixel text-xs tracking-[0.25em] text-black/50">NEXUS AI</span>
 
           {/* Nav sections */}
           <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
@@ -692,7 +692,7 @@ export default function AgenticPage() {
           </div>
         </div>
         <div className="max-w-6xl mx-auto mt-8 pt-6 border-t border-black/[0.04]">
-          <span className="text-xs text-black/20">© 2026 Agentic. All rights reserved.</span>
+          <span className="text-xs text-black/20">© 2026 Nexus AI. All rights reserved.</span>
         </div>
       </footer>
     </div>

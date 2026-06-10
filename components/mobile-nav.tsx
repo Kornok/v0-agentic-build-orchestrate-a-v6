@@ -31,7 +31,7 @@ export function MobileNav() {
           className="flex items-center justify-between px-5 py-3 rounded-2xl border border-black/[0.06]"
           style={NAV_STYLE}
         >
-          <span className="font-pixel text-xs tracking-[0.25em] text-black/70">AGENTIC</span>
+          <span className="font-pixel text-xs tracking-[0.25em] text-black/70">NEXUS AI</span>
 
           {/* Desktop links */}
           <div className="hidden md:flex items-center gap-7" style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}>
