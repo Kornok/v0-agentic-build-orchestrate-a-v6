@@ -330,7 +330,7 @@ export default function AgenticPage() {
         <div className="flex border-b border-black/[0.06]" style={{ animation: "marqueeLeft 28s linear infinite" }}>
           {[...Array(3)].map((_, rep) => (
             <div key={rep} className="flex shrink-0">
-              {["Web Research", "Code Generation", "Email Drafting", "Data Analysis", "PR Reviews", "Scheduling", "SQL Queries", "API Calls", "File Processing", "Monitoring"].map((cap) => (
+              {["Studying", "Writing", "Getting Information", "Planning", "Summarizing", "Translating", "Creating Schedules", "Generating Reports", "Voice Assistance", "Emergency Support"].map((cap) => (
                 <div key={cap} className="flex items-center gap-6 px-10 py-5 border-r border-black/[0.06] shrink-0">
                   <span className="w-1.5 h-1.5 rounded-full bg-black/20 shrink-0" />
                   <span className="text-sm text-black/45 whitespace-nowrap tracking-wide">{cap}</span>
@@ -342,7 +342,7 @@ export default function AgenticPage() {
         <div className="flex" style={{ animation: "marqueeRight 22s linear infinite" }}>
           {[...Array(3)].map((_, rep) => (
             <div key={rep} className="flex shrink-0">
-              {["Report Writing", "Slack Summaries", "Lead Scoring", "Image Tagging", "Test Running", "Deployment", "Log Parsing", "Invoice Processing", "Meeting Notes", "Sentiment Analysis"].map((cap) => (
+              {["Document Summary", "Language Translation", "Schedule Management", "Report Generation", "Assistant Support", "Local Services", "Accessibility Tools", "Information Retrieval", "Task Organization", "Workflow Support"].map((cap) => (
                 <div key={cap} className="flex items-center gap-6 px-10 py-5 border-r border-black/[0.06] shrink-0">
                   <span className="w-1.5 h-1.5 rounded-full bg-black/12 shrink-0" />
                   <span className="text-sm text-black/30 whitespace-nowrap tracking-wide">{cap}</span>
@@ -361,10 +361,10 @@ export default function AgenticPage() {
               <PixelIcon type="agents" size={40} />
               <div className="mt-4"><Tag>LIVE RIGHT NOW</Tag></div>
               <RevealText className="mt-5 text-4xl md:text-5xl lg:text-6xl font-light tracking-tight leading-[1.05]">
-                {"AI agents executing\ncritical tasks 24/7."}
+                {"AI agents helping with\nreal life complexities."}
               </RevealText>
               <p className="mt-6 text-base text-black/40 leading-relaxed max-w-sm">
-                At any moment, thousands of agents are running tasks on behalf of teams around the world — no human in the loop.
+                Discover how AI agents are assisting people with everyday tasks, complex work, and challenges that matter most.
               </p>
 
             </div>

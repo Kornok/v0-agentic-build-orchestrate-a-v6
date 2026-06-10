@@ -4,31 +4,31 @@ import { useEffect, useRef, useState } from "react"
 
 const AGENTS = [
   {
-    label: "RESEARCHER",
-    title: "Web & data research",
-    desc: "Autonomously browses the web, extracts structured data, synthesizes reports from multiple sources with citations.",
-    stats: [{ v: "98.2%", l: "accuracy" }],
+    label: "STUDYING",
+    title: "Studying",
+    desc: "AI analyzes documents, research papers, and online sources. Extracts key concepts, creates summaries, and builds comprehensive knowledge bases from any material.",
+    stats: [],
     img: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/researcher-CvhqOuV6irGwBOnJoTGFlXdbyYBRjb.png",
   },
   {
-    label: "CODER",
-    title: "Code generation & review",
-    desc: "Writes, refactors, and reviews code across 40+ languages. Runs tests, fixes bugs, opens pull requests automatically.",
-    stats: [{ v: "3.2s", l: "avg response" }],
+    label: "WRITING",
+    title: "Writing documents",
+    desc: "AI drafts emails, reports, articles, and proposals. Handles grammar, tone, and formatting while maintaining consistency with your style and requirements.",
+    stats: [],
     img: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/coder-9bItvCegU6TXUqbX3tUXGBAtvkBkXp.png",
   },
   {
-    label: "ANALYST",
-    title: "Data analysis & insights",
-    desc: "Connects to your databases, runs queries, visualizes trends, and surfaces anomalies before they become problems.",
-    stats: [{ v: "12x", l: "faster" }],
+    label: "INFORMATION",
+    title: "Getting information",
+    desc: "AI searches, retrieves, and organizes information from multiple sources. Finds answers, compiles data, and presents insights in easy-to-understand formats.",
+    stats: [],
     img: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/analyst-Ysxnqg7Fpy2cfA56PiIttv1KximMhT.png",
   },
   {
-    label: "EXECUTOR",
-    title: "Workflow automation",
-    desc: "Takes actions across APIs: sends messages, creates calendar events, triggers webhooks, and manages third-party apps.",
-    stats: [{ v: "5.6M", l: "executions" }, { v: "99.9%", l: "uptime" }],
+    label: "PLANNING",
+    title: "Planning tasks",
+    desc: "AI organizes workflows, schedules activities, and manages timelines. Creates structured plans, prioritizes work, and tracks progress across multiple projects.",
+    stats: [],
     img: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/executor-o1q6509qMLXMtpBIGo49vcgOu34sI1.png",
   },
 ]
@@ -143,14 +143,16 @@ export function StackingAgentCards() {
                     <h3 className="text-xl font-light mb-3">{agent.title}</h3>
                     <p className="text-sm text-black/45 leading-relaxed mb-8">{agent.desc}</p>
                   </div>
-                  <div className="flex gap-8 pt-6 border-t border-black/[0.06]">
-                    {agent.stats.map(s => (
-                      <div key={s.l}>
-                        <div className="text-2xl font-light">{s.v}</div>
-                        <div className="text-[11px] text-black/35 tracking-widest mt-0.5">{s.l}</div>
-                      </div>
-                    ))}
-                  </div>
+                  {agent.stats.length > 0 && (
+                    <div className="flex gap-8 pt-6 border-t border-black/[0.06]">
+                      {agent.stats.map(s => (
+                        <div key={s.l}>
+                          <div className="text-2xl font-light">{s.v}</div>
+                          <div className="text-[11px] text-black/35 tracking-widest mt-0.5">{s.l}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
               </div>
