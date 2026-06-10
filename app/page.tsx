@@ -168,68 +168,7 @@ export default function AgenticPage() {
           </div>
 
           <div className="grid grid-cols-12 grid-rows-auto gap-3" onMouseMove={handleMouse}>
-            {/* Big left card — full width now that multi-agent is removed */}
-            <BentoCard className="col-span-12 p-8 min-h-[200px] flex flex-col justify-between relative overflow-hidden" delay={0}>
-              {/* Arc background image — always fills container, objects pushed to bottom third */}
-              <img
-                src="/images/arc.png"
-                alt=""
-                aria-hidden="true"
-                className="absolute inset-0 w-full h-full object-cover"
-                style={{ objectPosition: "center 70%" }}
-              />
-              {/* Progressive blur layer — blurs from 45% downward */}
-              <div className="absolute inset-0" style={{
-                maskImage: "linear-gradient(to bottom, transparent 45%, black 100%)",
-                WebkitMaskImage: "linear-gradient(to bottom, transparent 45%, black 100%)",
-                backdropFilter: "blur(16px)",
-                WebkitBackdropFilter: "blur(16px)",
-              }} />
-              {/* Fade-to-background gradient — matches site bg color #f5f4f0 */}
-              <div
-                className="absolute inset-0"
-                style={{
-                  background: "linear-gradient(to bottom, transparent 35%, rgba(245,244,240,0.3) 50%, rgba(245,244,240,0.75) 65%, rgba(245,244,240,0.95) 80%, rgb(245,244,240) 100%)",
-                }}
-              />
-              {/* Content */}
-              <div className="relative z-10">
-                <div className="w-10 h-10 rounded-xl border border-black/10 bg-white/60 flex items-center justify-center mb-6" style={{ backdropFilter: "blur(8px)" }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><path d="m4.93 4.93 2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"/></svg>
-                </div>
-                <h3 className="text-xl font-light mb-3">Visual Agent Builder</h3>
-                <p className="text-sm text-black/45 leading-relaxed max-w-sm">
-                  Drag, connect, and configure agents through an intuitive graph editor. No boilerplate. Ship in minutes, not days.
-                </p>
-              </div>
-            </BentoCard>
-
-            {/* Bottom row */}
-            <BentoCard className="col-span-12 md:col-span-4 p-8 min-h-[200px]" delay={120}>
-              <div className="w-10 h-10 rounded-xl border border-black/10 flex items-center justify-center mb-5">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-              </div>
-              <h3 className="text-lg font-light mb-2">Real-time Monitoring</h3>
-              <p className="text-sm text-black/45 leading-relaxed">Trace every decision. Debug with full execution history and live logs.</p>
-            </BentoCard>
-
-            <BentoCard className="col-span-12 md:col-span-4 p-8 min-h-[200px]" delay={160}>
-              <div className="w-10 h-10 rounded-xl border border-black/10 flex items-center justify-center mb-5">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 10h8M8 14h5"/></svg>
-              </div>
-              <h3 className="text-lg font-light mb-2">Memory & Context</h3>
-              <p className="text-sm text-black/45 leading-relaxed">Persistent long-term memory across sessions. Agents learn from every interaction.</p>
-            </BentoCard>
-
-            <BentoCard className="col-span-12 md:col-span-4 p-8 min-h-[200px]" delay={200}>
-              <div className="w-10 h-10 rounded-xl border border-black/10 flex items-center justify-center mb-5">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              </div>
-              <h3 className="text-lg font-light mb-2">Guardrails & Permissions</h3>
-              <p className="text-sm text-black/45 leading-relaxed">Define what agents can and cannot do. Fine-grained access control per tool.</p>
-            </BentoCard>
-
-            <BentoCard className="col-span-12 md:col-span-3 p-8 min-h-[200px]" delay={240}>
+            <BentoCard className="col-span-12 md:col-span-3 p-8 min-h-[200px]" delay={0}>
               <div className="w-10 h-10 rounded-xl border border-black/10 flex items-center justify-center mb-5">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
               </div>
@@ -237,7 +176,7 @@ export default function AgenticPage() {
               <p className="text-sm text-black/45 leading-relaxed">Unlock unlimited potential with advanced AI capabilities and seamless integrations.</p>
             </BentoCard>
 
-            <BentoCard className="col-span-12 md:col-span-3 p-8 min-h-[200px]" delay={280}>
+            <BentoCard className="col-span-12 md:col-span-3 p-8 min-h-[200px]" delay={40}>
               <div className="w-10 h-10 rounded-xl border border-black/10 flex items-center justify-center mb-5">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
               </div>
@@ -245,7 +184,7 @@ export default function AgenticPage() {
               <p className="text-sm text-black/45 leading-relaxed">Smart scheduling and automation to save hours. Prioritize what matters most.</p>
             </BentoCard>
 
-            <BentoCard className="col-span-12 md:col-span-3 p-8 min-h-[200px]" delay={320}>
+            <BentoCard className="col-span-12 md:col-span-3 p-8 min-h-[200px]" delay={80}>
               <div className="w-10 h-10 rounded-xl border border-black/10 flex items-center justify-center mb-5">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
               </div>
@@ -253,7 +192,7 @@ export default function AgenticPage() {
               <p className="text-sm text-black/45 leading-relaxed">Hands-free control and voice commands for seamless accessibility and ease of use.</p>
             </BentoCard>
 
-            <BentoCard className="col-span-12 md:col-span-3 p-8 min-h-[200px]" delay={360}>
+            <BentoCard className="col-span-12 md:col-span-3 p-8 min-h-[200px]" delay={120}>
               <div className="w-10 h-10 rounded-xl border border-black/10 flex items-center justify-center mb-5">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/><polyline points="10 12 14 16 10 20"/></svg>
               </div>
