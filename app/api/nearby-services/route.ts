@@ -3,6 +3,7 @@ import {
   getLocationFromIP,
   getWeatherByLocation,
   reverseGeocode,
+  geocodePlace,
   type ServiceType,
 } from '@/lib/real-api-services'
 import { getRealServicesByCoordinates } from '@/lib/real-services-data'
@@ -23,12 +24,29 @@ const VALID_TYPES: ServiceType[] = [
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}))
-    const { lat, lng, serviceType, radius = 5000 } = body
+    const { lat, lng, serviceType, radius = 5000, place: placeQuery } = body
 
-    // Resolve coordinates: use provided values, fall back to IP, then NYC.
+    // Resolve coordinates: search query > provided coords > IP > NYC default.
     let latitude = typeof lat === 'number' ? lat : undefined
     let longitude = typeof lng === 'number' ? lng : undefined
-    let locationSource: 'device' | 'ip' | 'default' = 'device'
+    let locationSource: 'device' | 'ip' | 'default' | 'search' = 'device'
+    let searchedLabel: string | null = null
+
+    // If the user typed a location to search, geocode it and use those coordinates.
+    if (typeof placeQuery === 'string' && placeQuery.trim()) {
+      const geocoded = await geocodePlace(placeQuery.trim())
+      if (geocoded) {
+        latitude = geocoded.lat
+        longitude = geocoded.lng
+        searchedLabel = geocoded.label
+        locationSource = 'search'
+      } else {
+        return Response.json(
+          { error: `Could not find a location matching "${placeQuery}".` },
+          { status: 404 }
+        )
+      }
+    }
 
     if (latitude === undefined || longitude === undefined) {
       const ipLocation = await getLocationFromIP()
@@ -67,7 +85,7 @@ export async function POST(request: Request) {
       id: crypto.randomUUID(),
       location: { lat: latitude, lng: longitude },
       locationSource,
-      place: place?.label ?? null,
+      place: searchedLabel ?? place?.label ?? null,
       serviceType: requestedType,
       services,
       dataSource,

@@ -13,6 +13,8 @@ import {
   CloudSun,
   AlertCircle,
   Crosshair,
+  Search,
+  X,
 } from 'lucide-react'
 
 // Leaflet relies on the browser, so load the map only on the client.
@@ -48,7 +50,7 @@ interface Weather {
 
 interface NearbyResponse {
   location: { lat: number; lng: number }
-  locationSource: 'device' | 'ip' | 'default'
+  locationSource: 'device' | 'ip' | 'default' | 'search'
   place: string | null
   serviceType: string
   services: Service[]
@@ -79,6 +81,8 @@ export default function ServicesPage() {
   const [selectedType, setSelectedType] = useState('hospital')
   const [radius, setRadius] = useState(5000)
   const [searchQuery, setSearchQuery] = useState('')
+  const [locationQuery, setLocationQuery] = useState('')
+  const [activeLocationQuery, setActiveLocationQuery] = useState<string | null>(null)
   const [services, setServices] = useState<Service[]>([])
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
   const [place, setPlace] = useState<string | null>(null)
@@ -91,8 +95,14 @@ export default function ServicesPage() {
   const [copied, setCopied] = useState<string | null>(null)
 
   // Fetch services from the live API for a given location + type + radius.
+  // When `place` is provided, the server geocodes it and uses those coordinates.
   const fetchServices = useCallback(
-    async (coords: { lat: number; lng: number } | null, type: string, rad: number) => {
+    async (
+      coords: { lat: number; lng: number } | null,
+      type: string,
+      rad: number,
+      place?: string | null
+    ) => {
       setLoading(true)
       setError(null)
       try {
@@ -100,13 +110,17 @@ export default function ServicesPage() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            lat: coords?.lat,
-            lng: coords?.lng,
+            lat: place ? undefined : coords?.lat,
+            lng: place ? undefined : coords?.lng,
+            place: place || undefined,
             serviceType: type,
             radius: rad,
           }),
         })
-        if (!res.ok) throw new Error('Request failed')
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}))
+          throw new Error(data.error || 'Request failed')
+        }
         const data: NearbyResponse = await res.json()
 
         setServices(data.services || [])
@@ -124,7 +138,11 @@ export default function ServicesPage() {
         setLastUpdated(data.timestamp)
       } catch (err) {
         console.error('[v0] Failed to fetch nearby services:', err)
-        setError('Could not load nearby services. Please try again.')
+        setError(
+          err instanceof Error
+            ? err.message
+            : 'Could not load nearby services. Please try again.'
+        )
       } finally {
         setLoading(false)
       }
@@ -163,10 +181,12 @@ export default function ServicesPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // When type or radius changes, re-fetch using the location we already have.
+  // When type or radius changes, re-fetch. If a location was searched, keep using it.
   const handleTypeChange = (type: string) => {
     setSelectedType(type)
-    if (userLocation) {
+    if (activeLocationQuery) {
+      fetchServices(null, type, radius, activeLocationQuery)
+    } else if (userLocation) {
       fetchServices(userLocation, type, radius)
     } else {
       locateAndFetch(type, radius)
@@ -175,10 +195,37 @@ export default function ServicesPage() {
 
   const handleRadiusChange = (rad: number) => {
     setRadius(rad)
-    if (userLocation) {
+    if (activeLocationQuery) {
+      fetchServices(null, selectedType, rad, activeLocationQuery)
+    } else if (userLocation) {
       fetchServices(userLocation, selectedType, rad)
     } else {
       locateAndFetch(selectedType, rad)
+    }
+  }
+
+  // Search services in a typed location (e.g. "Paris", "90210", "Tokyo Station").
+  const handleLocationSearch = (e?: React.FormEvent) => {
+    e?.preventDefault()
+    const q = locationQuery.trim()
+    if (!q) return
+    setActiveLocationQuery(q)
+    fetchServices(null, selectedType, radius, q)
+  }
+
+  // Clear the searched location and go back to the user's own location.
+  const handleClearLocation = () => {
+    setLocationQuery('')
+    setActiveLocationQuery(null)
+    locateAndFetch(selectedType, radius)
+  }
+
+  // Refresh: re-run the active search or re-detect the device location.
+  const handleRefresh = () => {
+    if (activeLocationQuery) {
+      fetchServices(null, selectedType, radius, activeLocationQuery)
+    } else {
+      locateAndFetch(selectedType, radius)
     }
   }
 
@@ -249,7 +296,7 @@ export default function ServicesPage() {
               </div>
             )}
             <button
-              onClick={() => locateAndFetch(selectedType, radius)}
+              onClick={handleRefresh}
               disabled={loading}
               className="flex items-center gap-2 px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-sm font-light hover:opacity-90 transition-opacity disabled:opacity-50"
             >
@@ -270,7 +317,57 @@ export default function ServicesPage() {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-light text-foreground mb-2">
-                Search results by name or address
+                Search a location
+              </label>
+              <form onSubmit={handleLocationSearch} className="flex flex-col sm:flex-row gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <input
+                    type="text"
+                    value={locationQuery}
+                    onChange={(e) => setLocationQuery(e.target.value)}
+                    placeholder="Enter a city, address, or postal code..."
+                    className="w-full pl-10 pr-9 py-2 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                  {locationQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setLocationQuery('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      aria-label="Clear input"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading || !locationQuery.trim()}
+                  className="flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-light hover:opacity-90 transition-opacity disabled:opacity-50"
+                >
+                  <Search className="w-4 h-4" />
+                  Search
+                </button>
+              </form>
+              {activeLocationQuery && (
+                <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                  <span>
+                    Showing results near <span className="text-foreground">{locationLabel()}</span>
+                  </span>
+                  <button
+                    onClick={handleClearLocation}
+                    className="flex items-center gap-1 text-primary hover:underline"
+                  >
+                    <Crosshair className="w-3 h-3" />
+                    Use my location
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-light text-foreground mb-2">
+                Filter these results by name or address
               </label>
               <input
                 type="text"

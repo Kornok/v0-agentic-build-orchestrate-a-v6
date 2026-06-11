@@ -115,28 +115,50 @@ export async function findNearbyServices(
     .join('')
   const query = `[out:json][timeout:25];(${filters});out center;`
 
-  try {
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 8000)
+  // Try multiple Overpass mirrors so a single rate-limited/overloaded endpoint
+  // doesn't force us onto the curated fallback.
+  const endpoints = [
+    'https://overpass-api.de/api/interpreter',
+    'https://overpass.kumi.systems/api/interpreter',
+    'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+  ]
 
-    const response = await fetch('https://overpass-api.de/api/interpreter', {
-      method: 'POST',
-      body: `data=${encodeURIComponent(query)}`,
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'User-Agent': 'NEXUS-AI-Service-Finder',
-      },
-      signal: controller.signal,
-    })
-    clearTimeout(timeout)
+  let data: any = null
+  for (const endpoint of endpoints) {
+    try {
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 12000)
 
-    if (!response.ok) {
-      throw new Error(`Overpass API returned ${response.status}`)
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        body: `data=${encodeURIComponent(query)}`,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'User-Agent': 'NEXUS-AI-Service-Finder',
+        },
+        signal: controller.signal,
+      })
+      clearTimeout(timeout)
+
+      if (!response.ok) continue
+
+      // A rate-limited mirror sometimes returns an HTML error page with a 200.
+      const contentType = response.headers.get('content-type') || ''
+      if (!contentType.includes('json')) continue
+
+      const json = await response.json()
+      if (json && Array.isArray(json.elements)) {
+        data = json
+        break
+      }
+    } catch (err) {
+      console.error(`Overpass endpoint failed (${endpoint}):`, err)
+      // Try the next mirror.
     }
+  }
 
-    const data = await response.json()
-
-    if (!data.elements || data.elements.length === 0) {
+  try {
+    if (!data || !data.elements || data.elements.length === 0) {
       return []
     }
 
@@ -367,6 +389,29 @@ export async function reverseGeocode(
     const country = addr.country
     const label = [city, addr.state, country].filter(Boolean).join(', ') || data.display_name
     return { label, city, country }
+  } catch {
+    return null
+  }
+}
+
+// Forward geocoding via OpenStreetMap Nominatim - turn a place name into coordinates
+export async function geocodePlace(
+  query: string
+): Promise<{ lat: number; lng: number; label: string } | null> {
+  try {
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${encodeURIComponent(query)}`,
+      { headers: { 'User-Agent': 'NEXUS-AI-Service-Finder' } }
+    )
+    if (!response.ok) return null
+    const data = await response.json()
+    if (!Array.isArray(data) || data.length === 0) return null
+    const top = data[0]
+    return {
+      lat: parseFloat(top.lat),
+      lng: parseFloat(top.lon),
+      label: top.display_name as string,
+    }
   } catch {
     return null
   }
