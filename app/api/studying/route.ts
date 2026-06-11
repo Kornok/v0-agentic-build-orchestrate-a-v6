@@ -14,69 +14,140 @@ async function trySave(table: string, row: Record<string, unknown>) {
 
 function generateMockStudyMaterial(topic: string, studyType: string): string {
   if (studyType === 'quiz') {
-    return `Question 1: What is the primary concept related to ${topic}?
-A) First concept
-B) Second concept  
-C) Third concept
-D) Fourth concept
-Answer: B
+    return `# Practice Quiz: ${topic}
 
-Question 2: How does ${topic} relate to practical applications?
-A) In education
-B) In industry
-C) In research
+**Question 1:** What is the primary concept related to ${topic}?
+A) First fundamental principle
+B) Second key concept  
+C) Third important aspect
+D) Fourth relevant element
+**Answer: B**
+
+**Question 2:** How does ${topic} apply in real-world scenarios?
+A) In education and learning
+B) In industry and business
+C) In research and development
 D) All of the above
-Answer: D
+**Answer: D**
 
-Question 3: What are the key principles of ${topic}?
-A) Principle A and B
-B) Principle B and C
-C) Principle C and D
-D) Principle A and D
-Answer: A
+**Question 3:** What are the core principles of ${topic}?
+A) Principles A and B
+B) Principles B and C
+C) Principles C and D
+D) Principles A and D
+**Answer: A**
 
-Question 4: Why is ${topic} important?
-A) It's foundational
-B) It's widely used
-C) It's evolving
-D) All reasons
-Answer: D
+**Question 4:** Why is understanding ${topic} important today?
+A) It's foundational to the field
+B) It's widely used in practice
+C) It's constantly evolving
+D) All of these reasons
+**Answer: D**
 
-Question 5: What's a real-world example of ${topic}?
-A) Example from nature
-B) Example from technology
-C) Example from society
-D) All apply
-Answer: D`
+**Question 5:** Which of these is a real-world application of ${topic}?
+A) Natural phenomena examples
+B) Technology implementations
+C) Social and societal uses
+D) All of these examples apply
+**Answer: D**
+
+**Question 6:** What historical context matters for ${topic}?
+A) Its origins and development
+B) Key milestones and breakthroughs
+C) Evolution over time
+D) All historical aspects are relevant
+**Answer: D**
+
+**Question 7:** How does ${topic} relate to other fields?
+A) Strong connections to science
+B) Links to technology
+C) Integration with humanities
+D) Interdisciplinary connections exist
+**Answer: D**
+
+**Question 8:** What challenges exist in ${topic}?
+A) Theoretical difficulties
+B) Practical implementation issues
+C) Resource constraints
+D) Multiple challenges exist
+**Answer: D**`
   }
 
-  return `# Study Material on ${topic}
+  if (studyType === 'explanation') {
+    return `# Detailed Explanation: ${topic}
+
+## What is ${topic}?
+${topic} is a comprehensive concept that encompasses various interconnected principles and practices. It represents a significant field of study with wide-ranging applications across multiple domains.
+
+## Core Principles
+The fundamental principles of ${topic} include:
+
+1. **Foundation Principle**: The basic concepts that form the bedrock of understanding
+2. **Application Principle**: How the concepts work in practical scenarios
+3. **Integration Principle**: How ${topic} connects with other areas of knowledge
+4. **Evolution Principle**: How ${topic} has developed and continues to change
+
+## How It Works
+${topic} operates through several interconnected mechanisms:
+- Understanding foundational concepts is essential
+- Application of theory to practice bridges knowledge gaps
+- Integration with existing knowledge creates deeper comprehension
+- Continuous learning leads to mastery
+
+## Why It's Important
+Understanding ${topic} provides numerous benefits:
+- Enhanced problem-solving abilities
+- Better decision-making capacity
+- Improved professional competence
+- Greater adaptability to change
+
+## Real-World Applications
+${topic} appears in many real-world contexts:
+- **Educational Context**: Learning and academic advancement
+- **Professional Context**: Career development and workplace applications
+- **Personal Context**: Individual growth and capability development
+- **Societal Context**: Contributing to community and society
+
+## Key Takeaways
+- ${topic} is multifaceted and interconnected
+- Understanding requires engagement with theory and practice
+- Real-world applications make knowledge meaningful
+- Continued learning enhances mastery over time`
+  }
+
+  // Default: Study Notes
+  return `# Study Notes: ${topic}
 
 ## Key Concepts and Definitions
-${topic} encompasses several fundamental ideas and principles that form the foundation of understanding this subject matter.
+${topic} encompasses several fundamental ideas and principles that form the foundation of understanding this subject matter. These concepts are essential building blocks for deeper learning.
 
 ## Important Facts and Figures
-- Core facts about ${topic}
-- Statistical data points
-- Historical context
-- Modern applications
+- **Core Facts**: Essential information about ${topic}
+- **Statistical Data**: Key metrics and measurements
+- **Historical Context**: How ${topic} has evolved
+- **Modern Applications**: Current relevance and use cases
 
 ## Main Points to Remember
 - ${topic} is essential in contemporary practice
 - It has wide-ranging applications across multiple fields
 - Understanding this topic provides competitive advantages
-- Practical implementation requires understanding key principles
+- Practical implementation requires grasping key principles
+- The field continues to evolve with new discoveries
+- Integration with other knowledge areas strengthens understanding
 
 ## Examples and Applications
-${topic} can be observed in various real-world scenarios:
-- Educational settings
-- Professional environments
-- Research contexts
-- Daily life applications
+${topic} can be observed and applied in various real-world scenarios:
+- **Educational settings**: Used in academic instruction and learning
+- **Professional environments**: Applied in workplace and business contexts
+- **Research contexts**: Studied in academic and scientific research
+- **Daily life applications**: Relevant to everyday situations
+- **Industry practices**: Implemented in professional sectors
+- **Technology applications**: Integrated into technological systems
 
-## Related Concepts
-Understanding ${topic} helps with comprehending related topics and seeing connections across disciplines.`
+## Summary
+Mastering ${topic} requires understanding both theoretical foundations and practical applications. Regular review and practice help solidify knowledge in this important area.`
 }
+
 
 export async function POST(request: Request) {
   try {
