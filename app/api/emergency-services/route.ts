@@ -1,4 +1,4 @@
-import { getEmergencyContacts, getLocationFromIP } from '@/lib/real-api-services'
+import { getEmergencyContacts } from '@/lib/real-api-services'
 
 interface EmergencyData {
   country: string
@@ -13,14 +13,8 @@ export async function POST(request: Request) {
   try {
     const { countryCode } = await request.json()
 
-    // If no country code provided, try to get it from IP
-    let code = countryCode || 'US'
-    if (!countryCode) {
-      const location = await getLocationFromIP()
-      if (location) {
-        code = location.country
-      }
-    }
+    // Use provided country code or default to UK (999 emergency number)
+    const code = countryCode || 'UK'
 
     // Get real emergency numbers
     const emergencyData = getEmergencyContacts(code)

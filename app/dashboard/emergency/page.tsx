@@ -26,21 +26,22 @@ export default function EmergencyPage() {
   const [emergencyData, setEmergencyData] = useState<RealEmergencyData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [countryCode, setCountryCode] = useState('US')
+  const [countryCode, setCountryCode] = useState<string | null>(null)
 
   // Fetch real emergency data on mount
   useEffect(() => {
     const fetchEmergencyData = async () => {
       try {
         setLoading(true)
+        // Don't pass countryCode - let the API use the UK default
         const response = await fetch('/api/emergency-services', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ countryCode }),
+          body: JSON.stringify({}),
         })
         const data = await response.json()
         setEmergencyData(data)
-        setCountryCode(data.country || 'US')
+        setCountryCode(data.country || 'UK')
       } catch (err) {
         setError('Failed to fetch emergency data')
       } finally {
