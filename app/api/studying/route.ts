@@ -12,9 +12,9 @@ async function trySave(table: string, row: Record<string, unknown>) {
 }
 
 async function generateWithGroq(prompt: string, systemPrompt: string): Promise<string> {
-  const apiKey = process.env.GROQ_API_KEY
+  const apiKey = process.env.GROQ_API_KEY_3
   if (!apiKey) {
-    throw new Error('GROQ_API_KEY is not configured')
+    throw new Error('GROQ_API_KEY_3 is not configured')
   }
 
   const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
