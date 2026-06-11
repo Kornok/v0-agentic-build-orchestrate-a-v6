@@ -1,4 +1,5 @@
 import { findNearbyServices, getLocationFromIP, getWeatherByLocation } from '@/lib/real-api-services'
+import { getRealServicesByCoordinates } from '@/lib/real-services-data'
 
 export async function POST(request: Request) {
   try {
@@ -20,17 +21,27 @@ export async function POST(request: Request) {
       }
     }
 
-    // Try to get real nearby services, but fallback to defaults
-    let services = await findNearbyServices(
-      latitude,
-      longitude,
-      serviceType as 'hospital' | 'police' | 'pharmacy' | 'restaurant' | 'cafe',
-      radius
-    ).catch(() => [])
+    // Try to get real services: First from Overpass, then from our real database
+    let services = []
+    
+    try {
+      // Try Overpass API first (real-time OpenStreetMap data)
+      services = await Promise.race([
+        findNearbyServices(
+          latitude,
+          longitude,
+          serviceType as 'hospital' | 'police' | 'pharmacy' | 'restaurant' | 'cafe',
+          radius
+        ),
+        new Promise(resolve => setTimeout(() => resolve([]), 4000)) // 4 second timeout
+      ])
+    } catch (err) {
+      console.error('Overpass API error:', err)
+    }
 
-    // Use defaults if Overpass didn't return data
-    if (services.length === 0) {
-      services = getDefaultServices(serviceType)
+    // If Overpass didn't return data, use our real services database
+    if (!services || services.length === 0) {
+      services = getRealServicesByCoordinates(latitude, longitude, serviceType)
     }
 
     // Also get weather data

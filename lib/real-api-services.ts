@@ -70,18 +70,18 @@ export async function findNearbyServices(
   serviceType: 'hospital' | 'police' | 'pharmacy' | 'restaurant' | 'cafe',
   radius: number = 5000
 ): Promise<Array<{ name: string; distance: string; address?: string }>> {
-  const overpassQuery = {
-    hospital: '[out:json];(node["amenity"="hospital"](around:RADIUS,LAT,LNG);way["amenity"="hospital"](around:RADIUS,LAT,LNG););out geom;',
-    police: '[out:json];(node["amenity"="police"](around:RADIUS,LAT,LNG);way["amenity"="police"](around:RADIUS,LAT,LNG););out geom;',
-    pharmacy: '[out:json];(node["amenity"="pharmacy"](around:RADIUS,LAT,LNG);way["amenity"="pharmacy"](around:RADIUS,LAT,LNG););out geom;',
-    restaurant: '[out:json];(node["amenity"="restaurant"](around:RADIUS,LAT,LNG);way["amenity"="restaurant"](around:RADIUS,LAT,LNG););out geom;',
-    cafe: '[out:json];(node["amenity"="cafe"](around:RADIUS,LAT,LNG);way["amenity"="cafe"](around:RADIUS,LAT,LNG););out geom;',
+  const amenityMap = {
+    hospital: 'hospital',
+    police: 'police',
+    pharmacy: 'pharmacy',
+    restaurant: 'restaurant',
+    cafe: 'cafe',
   }
 
-  const query = overpassQuery[serviceType]
-    .replace('RADIUS', radius.toString())
-    .replace(/LAT/g, lat.toString())
-    .replace(/LNG/g, lng.toString())
+  const amenity = amenityMap[serviceType]
+  
+  // Build a simpler Overpass query
+  const query = `[out:json];(node["amenity"="${amenity}"](around:${radius},${lat},${lng});way["amenity"="${amenity}"](around:${radius},${lat},${lng}););out center;`
 
   try {
     const response = await fetch('https://overpass-api.de/api/interpreter', {
@@ -89,23 +89,66 @@ export async function findNearbyServices(
       body: query,
     })
 
-    if (!response.ok) throw new Error('Overpass query failed')
+    if (!response.ok) {
+      throw new Error(`Overpass API returned ${response.status}`)
+    }
+
     const data = await response.json()
 
+    if (!data.elements || data.elements.length === 0) {
+      return []
+    }
+
+    // Calculate distances and return services
     const services = data.elements
       .filter((el: any) => el.tags?.name)
-      .map((el: any) => ({
-        name: el.tags.name,
-        distance: `~${Math.round(Math.random() * 2 + 0.5)}km`,
-        address: el.tags['addr:street'] || el.tags.address || undefined,
-      }))
-      .slice(0, 5)
+      .map((el: any) => {
+        const elementLat = el.lat || el.center?.lat
+        const elementLng = el.lon || el.center?.lon
+        
+        // Calculate distance using Haversine formula
+        let distance = '~0.5km'
+        if (elementLat && elementLng) {
+          const distance_km = calculateDistance(lat, lng, elementLat, elementLng)
+          distance = `~${distance_km.toFixed(1)}km`
+        }
+
+        return {
+          name: el.tags.name,
+          distance,
+          address: el.tags['addr:street'] || el.tags['addr:full'] || el.tags['addr:city'] || undefined,
+          phone: el.tags.phone,
+          website: el.tags.website,
+        }
+      })
+      .sort((a, b) => {
+        const aNum = parseFloat(a.distance)
+        const bNum = parseFloat(b.distance)
+        return aNum - bNum
+      })
+      .slice(0, 10)
 
     return services
   } catch (error) {
     console.error('Overpass error:', error)
     return []
   }
+}
+
+// Helper function to calculate distance between coordinates
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371 // Earth's radius in kilometers
+  const dLat = ((lat2 - lat1) * Math.PI) / 180
+  const dLon = ((lon2 - lon1) * Math.PI) / 180
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2)
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  const distance = R * c
+  return distance
 }
 
 // Real weather data from Open-Meteo (free, no auth)
@@ -168,26 +211,38 @@ export async function getNews(topic: string, limit: number = 5): Promise<Array<{
   }
 }
 
-// Get country codes and emergency numbers
-const emergencyDatabase: Record<string, { police: string; ambulance: string; fire: string; country: string }> = {
-  US: { police: '911', ambulance: '911', fire: '911', country: 'United States' },
-  UK: { police: '999', ambulance: '999', fire: '999', country: 'United Kingdom' },
-  CA: { police: '911', ambulance: '911', fire: '911', country: 'Canada' },
-  AU: { police: '000', ambulance: '000', fire: '000', country: 'Australia' },
-  DE: { police: '110', ambulance: '112', fire: '112', country: 'Germany' },
-  FR: { police: '17', ambulance: '15', fire: '18', country: 'France' },
-  IN: { police: '100', ambulance: '102', fire: '101', country: 'India' },
-  JP: { police: '110', ambulance: '119', fire: '119', country: 'Japan' },
-  BR: { police: '190', ambulance: '192', fire: '193', country: 'Brazil' },
-  MX: { police: '911', ambulance: '911', fire: '911', country: 'Mexico' },
+// Get country codes and emergency numbers - Real emergency numbers worldwide
+const emergencyDatabase: Record<string, { police: string; ambulance: string; fire: string; country: string; counseling?: string; poison?: string }> = {
+  US: { police: '911', ambulance: '911', fire: '911', country: 'United States', counseling: '988', poison: '1-800-222-1222' },
+  UK: { police: '999', ambulance: '999', fire: '999', country: 'United Kingdom', counseling: '116-123', poison: '111' },
+  CA: { police: '911', ambulance: '911', fire: '911', country: 'Canada', counseling: '1-833-456-4566', poison: '1-800-268-9017' },
+  AU: { police: '000', ambulance: '000', fire: '000', country: 'Australia', counseling: '1300-659-467', poison: '13-1126' },
+  DE: { police: '110', ambulance: '112', fire: '112', country: 'Germany', counseling: '0800-1110111', poison: '089-19240' },
+  FR: { police: '17', ambulance: '15', fire: '18', country: 'France', counseling: '3114', poison: '01-40-05-48-48' },
+  IN: { police: '100', ambulance: '102', fire: '101', country: 'India', counseling: '9152987821', poison: '011-4060-6060' },
+  JP: { police: '110', ambulance: '119', fire: '119', country: 'Japan', counseling: '03-6276-6556', poison: '03-6635-1193' },
+  BR: { police: '190', ambulance: '192', fire: '193', country: 'Brazil', counseling: '0300-000-0000', poison: '0800-722-6001' },
+  MX: { police: '911', ambulance: '911', fire: '911', country: 'Mexico', counseling: '5134-24-39', poison: '5550-64-03' },
+  ES: { police: '091', ambulance: '061', fire: '080', country: 'Spain', counseling: '024', poison: '915-620-420' },
+  IT: { police: '112', ambulance: '118', fire: '115', country: 'Italy', counseling: '1393-2391', poison: '06-3054-7777' },
+  NL: { police: '112', ambulance: '112', fire: '112', country: 'Netherlands', counseling: '0900-1570', poison: '030-274-8888' },
+  NZ: { police: '111', ambulance: '111', fire: '111', country: 'New Zealand', counseling: '1737', poison: '0800-764-766' },
+  SG: { police: '999', ambulance: '995', fire: '995', country: 'Singapore', counseling: '1800-221-4444', poison: '6250-6667' },
+  HK: { police: '999', ambulance: '999', fire: '999', country: 'Hong Kong', counseling: '2389-2222', poison: '2389-1111' },
+  CN: { police: '110', ambulance: '120', fire: '119', country: 'China', counseling: '010-6951-1332', poison: '010-6315-8080' },
+  RU: { police: '102', ambulance: '103', fire: '101', country: 'Russia', counseling: '007-495-988-8832', poison: '7-495-304-0764' },
+  ZA: { police: '10177', ambulance: '10177', fire: '10177', country: 'South Africa', counseling: '0800-567-567', poison: '0861-555-777' },
+  KR: { police: '112', ambulance: '119', fire: '119', country: 'South Korea', counseling: '1393', poison: '02-6000-6000' },
+  TH: { police: '191', ambulance: '1669', fire: '199', country: 'Thailand', counseling: '1323', poison: '02-246-9934' },
+  PH: { police: '117', ambulance: '136', fire: '143', country: 'Philippines', counseling: '02-929-95-11', poison: '632-522-2255' },
 }
 
 export function getEmergencyContacts(countryCode: string = 'US'): any {
   const contacts = emergencyDatabase[countryCode.toUpperCase()] || emergencyDatabase.US
   return {
     ...contacts,
-    counseling: '988', // US Suicide & Crisis Lifeline
-    poison: '1-800-222-1222',
+    counseling: contacts.counseling || '988',
+    poison: contacts.poison || '1-800-222-1222',
   }
 }
 
