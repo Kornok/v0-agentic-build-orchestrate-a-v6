@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/server'
-import { generateFreeText } from '@/lib/free-ai'
 
 async function trySave(table: string, row: Record<string, unknown>) {
   try {
@@ -12,143 +11,6 @@ async function trySave(table: string, row: Record<string, unknown>) {
   }
 }
 
-function generateMockStudyMaterial(topic: string, studyType: string): string {
-  if (studyType === 'quiz') {
-    return `# Practice Quiz: ${topic}
-
-**Question 1:** What is the primary concept related to ${topic}?
-A) First fundamental principle
-B) Second key concept  
-C) Third important aspect
-D) Fourth relevant element
-**Answer: B**
-
-**Question 2:** How does ${topic} apply in real-world scenarios?
-A) In education and learning
-B) In industry and business
-C) In research and development
-D) All of the above
-**Answer: D**
-
-**Question 3:** What are the core principles of ${topic}?
-A) Principles A and B
-B) Principles B and C
-C) Principles C and D
-D) Principles A and D
-**Answer: A**
-
-**Question 4:** Why is understanding ${topic} important today?
-A) It's foundational to the field
-B) It's widely used in practice
-C) It's constantly evolving
-D) All of these reasons
-**Answer: D**
-
-**Question 5:** Which of these is a real-world application of ${topic}?
-A) Natural phenomena examples
-B) Technology implementations
-C) Social and societal uses
-D) All of these examples apply
-**Answer: D**
-
-**Question 6:** What historical context matters for ${topic}?
-A) Its origins and development
-B) Key milestones and breakthroughs
-C) Evolution over time
-D) All historical aspects are relevant
-**Answer: D**
-
-**Question 7:** How does ${topic} relate to other fields?
-A) Strong connections to science
-B) Links to technology
-C) Integration with humanities
-D) Interdisciplinary connections exist
-**Answer: D**
-
-**Question 8:** What challenges exist in ${topic}?
-A) Theoretical difficulties
-B) Practical implementation issues
-C) Resource constraints
-D) Multiple challenges exist
-**Answer: D**`
-  }
-
-  if (studyType === 'explanation') {
-    return `# Detailed Explanation: ${topic}
-
-## What is ${topic}?
-${topic} is a comprehensive concept that encompasses various interconnected principles and practices. It represents a significant field of study with wide-ranging applications across multiple domains.
-
-## Core Principles
-The fundamental principles of ${topic} include:
-
-1. **Foundation Principle**: The basic concepts that form the bedrock of understanding
-2. **Application Principle**: How the concepts work in practical scenarios
-3. **Integration Principle**: How ${topic} connects with other areas of knowledge
-4. **Evolution Principle**: How ${topic} has developed and continues to change
-
-## How It Works
-${topic} operates through several interconnected mechanisms:
-- Understanding foundational concepts is essential
-- Application of theory to practice bridges knowledge gaps
-- Integration with existing knowledge creates deeper comprehension
-- Continuous learning leads to mastery
-
-## Why It's Important
-Understanding ${topic} provides numerous benefits:
-- Enhanced problem-solving abilities
-- Better decision-making capacity
-- Improved professional competence
-- Greater adaptability to change
-
-## Real-World Applications
-${topic} appears in many real-world contexts:
-- **Educational Context**: Learning and academic advancement
-- **Professional Context**: Career development and workplace applications
-- **Personal Context**: Individual growth and capability development
-- **Societal Context**: Contributing to community and society
-
-## Key Takeaways
-- ${topic} is multifaceted and interconnected
-- Understanding requires engagement with theory and practice
-- Real-world applications make knowledge meaningful
-- Continued learning enhances mastery over time`
-  }
-
-  // Default: Study Notes
-  return `# Study Notes: ${topic}
-
-## Key Concepts and Definitions
-${topic} encompasses several fundamental ideas and principles that form the foundation of understanding this subject matter. These concepts are essential building blocks for deeper learning.
-
-## Important Facts and Figures
-- **Core Facts**: Essential information about ${topic}
-- **Statistical Data**: Key metrics and measurements
-- **Historical Context**: How ${topic} has evolved
-- **Modern Applications**: Current relevance and use cases
-
-## Main Points to Remember
-- ${topic} is essential in contemporary practice
-- It has wide-ranging applications across multiple fields
-- Understanding this topic provides competitive advantages
-- Practical implementation requires grasping key principles
-- The field continues to evolve with new discoveries
-- Integration with other knowledge areas strengthens understanding
-
-## Examples and Applications
-${topic} can be observed and applied in various real-world scenarios:
-- **Educational settings**: Used in academic instruction and learning
-- **Professional environments**: Applied in workplace and business contexts
-- **Research contexts**: Studied in academic and scientific research
-- **Daily life applications**: Relevant to everyday situations
-- **Industry practices**: Implemented in professional sectors
-- **Technology applications**: Integrated into technological systems
-
-## Summary
-Mastering ${topic} requires understanding both theoretical foundations and practical applications. Regular review and practice help solidify knowledge in this important area.`
-}
-
-
 export async function POST(request: Request) {
   try {
     const { topic, studyType } = await request.json()
@@ -160,71 +22,108 @@ export async function POST(request: Request) {
     let prompt = ''
 
     if (studyType === 'notes') {
-      prompt = `Create comprehensive study notes on the topic: "${topic}"
-      
+      prompt = `Create comprehensive study notes about "${topic}". 
+
 Include:
 - Key concepts and definitions
 - Important facts and figures
 - Main points to remember
-- Examples
+- Real-world examples
+- Summary of important ideas
 
-Format the notes in a clear, organized manner.`
+Format it clearly with headers and bullet points for easy studying.`
     } else if (studyType === 'explanation') {
-      prompt = `Provide a detailed explanation of: "${topic}"
+      prompt = `Provide a detailed, broad explanation of "${topic}". 
 
 Include:
-- What it is
-- How it works
+- What it is (clear definition)
+- How it works (detailed explanation)
 - Why it's important
-- Real-world applications
+- Real-world applications and use cases
 - Related concepts
+- Key takeaways
 
-Make it easy to understand for a student.`
+Make it easy to understand for someone learning this for the first time.`
     } else if (studyType === 'quiz') {
-      prompt = `Create 5 practice quiz questions about: "${topic}"
+      prompt = `Create a practice quiz with Multiple Choice Questions (MCQs) about "${topic}".
 
-Format:
+Requirements:
+- Generate between 10-15 practice questions
+- Each question should have 4 options (A, B, C, D)
+- Include the correct answer for each question
+- Questions should cover different aspects of the topic
+- Format each question clearly
+
+Format example:
 Question 1: [Question text]
-A) [Option A]
-B) [Option B]
-C) [Option C]
-D) [Option D]
-Answer: [Correct option]
-
-[Repeat for all 5 questions]`
+A) Option 1
+B) Option 2
+C) Option 3
+D) Option 4
+Answer: B`
     } else {
-      prompt = `Create comprehensive study material on the topic: "${topic}"`
+      prompt = `Create comprehensive study material about "${topic}"`
     }
 
-    let studyMaterial = ''
-    try {
-      studyMaterial = await generateFreeText({
-        prompt,
-        system: 'You are an expert tutor who creates clear, well-organized study material for students.',
-        temperature: 0.7,
-        retries: 3,
-      })
-    } catch (error) {
-      console.log('[v0] API service temporarily unavailable, using mock response')
-      studyMaterial = generateMockStudyMaterial(topic, studyType)
+    // Using Groq API
+    const groqApiKey = process.env.GROQ_API_KEY
+    if (!groqApiKey) {
+      return Response.json({ error: 'GROQ_API_KEY not configured' }, { status: 500 })
     }
+
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${groqApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'mixtral-8x7b-32768',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are an expert tutor who creates clear, well-organized study material for students.',
+          },
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
+        max_tokens: 2048,
+        temperature: 0.7,
+      }),
+    })
+
+    if (!response.ok) {
+      const error = await response.text()
+      console.error('[v0] Groq API error:', error)
+      return Response.json(
+        { error: 'Failed to generate study material' },
+        { status: 500 }
+      )
+    }
+
+    const data = await response.json()
+    const studyMaterial = data.choices[0].message.content
 
     const saved = await trySave('study_sessions', {
       topic,
       notes: studyMaterial,
-      explanation: studyMaterial,
       study_type: studyType,
     })
 
     return Response.json({
       id: saved?.id ?? crypto.randomUUID(),
-      notes: studyMaterial,
-      explanation: studyMaterial,
+      content: studyMaterial,
+      type: studyType,
       createdAt: saved?.created_at ?? new Date().toISOString(),
     })
   } catch (error) {
-    console.error('Error:', error)
-    return Response.json({ error: 'Failed to generate study material' }, { status: 500 })
+    console.error('[v0] Error in studying API:', error)
+    return Response.json(
+      { error: 'Failed to generate study material' },
+      { status: 500 }
+    )
   }
 }
 

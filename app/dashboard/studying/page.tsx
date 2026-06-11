@@ -48,7 +48,7 @@ export default function StudyingPage() {
         {
           id: data.id,
           topic,
-          content: data.notes,
+          content: data.content,
           studyType,
           created_at: data.createdAt,
         },

@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/server'
-import { generateFreeText } from '@/lib/free-ai'
 
 async function trySave(table: string, row: Record<string, unknown>) {
   try {
@@ -10,128 +9,6 @@ async function trySave(table: string, row: Record<string, unknown>) {
   } catch {
     return null
   }
-}
-
-function generateMockDocument(title: string, topic: string, docType: string): string {
-  let content = `# ${title}\n\n`
-
-  switch (docType) {
-    case 'essay':
-      content += `## Introduction
-This essay explores ${topic}, a significant subject matter that deserves comprehensive analysis and understanding. Through examination of key concepts, historical context, and contemporary applications, we develop a nuanced understanding of this important topic.
-
-## Body
-
-### Main Argument 1
-${topic} presents several key considerations that warrant detailed examination. These foundational elements provide the basis for deeper understanding.
-
-### Main Argument 2
-The practical implications of ${topic} extend across multiple domains, affecting both theory and practice in meaningful ways.
-
-### Main Argument 3
-Looking forward, ${topic} continues to evolve and adapt to contemporary challenges and opportunities.
-
-## Conclusion
-In summary, ${topic} represents an important area of study with far-reaching implications. The insights developed through this examination provide valuable perspective for future learning and application.`
-      break
-
-    case 'email':
-      content += `Dear Recipient,
-
-I hope this message finds you well. I am writing to discuss ${topic}, a matter of importance that I believe warrants your attention.
-
-${topic} has several key aspects that deserve consideration. The primary points include various elements that contribute to our understanding of this subject.
-
-I would appreciate the opportunity to discuss this further at your earliest convenience. Please feel free to reach out with your thoughts and feedback.
-
-Thank you for your consideration.
-
-Best regards,
-[Your Name]`
-      break
-
-    case 'report':
-      content += `## Executive Summary
-This report examines ${topic} and its implications. Key findings and recommendations are presented for consideration.
-
-## Introduction
-${topic} represents an important area requiring analysis and understanding. This report provides comprehensive coverage of relevant aspects.
-
-## Key Findings
-- Finding 1: Important data point about ${topic}
-- Finding 2: Relevant consideration and context
-- Finding 3: Practical implication or trend
-
-## Analysis
-The data suggests several important patterns and relationships within ${topic}. These observations provide valuable context for decision-making.
-
-## Recommendations
-1. Recommendation 1 based on findings
-2. Recommendation 2 for implementation
-3. Recommendation 3 for future consideration
-
-## Conclusion
-${topic} requires ongoing attention and analysis. The recommendations presented offer a pathway forward.`
-      break
-
-    case 'article':
-      content += `## ${topic}: Everything You Need to Know
-
-${topic} has become increasingly relevant in today's world. Whether you're a beginner or experienced practitioner, understanding this topic can significantly impact your success.
-
-### Why ${topic} Matters
-
-${topic} plays a crucial role in modern life and professional contexts. By understanding its key principles, you'll be better equipped to navigate contemporary challenges.
-
-### Key Points to Consider
-
-Understanding ${topic} requires attention to several important aspects:
-- Core concepts and definitions
-- Historical context and evolution
-- Contemporary applications and trends
-- Future outlook and opportunities
-
-### Getting Started with ${topic}
-
-For those new to ${topic}, beginning with foundational concepts is essential. Gradually building knowledge through practical experience accelerates mastery.
-
-### Frequently Asked Questions
-
-**What is ${topic}?**
-${topic} encompasses various related concepts and practices that form an important body of knowledge.
-
-**How can I learn more about ${topic}?**
-Continued study, practice, and engagement with the subject matter deepens understanding over time.
-
-### Conclusion
-
-${topic} offers valuable insights and practical applications. By investing time in understanding this subject, you position yourself for success in an increasingly complex world.`
-      break
-
-    default:
-      content += `## ${topic}
-
-This document covers important aspects of ${topic}.
-
-### Overview
-${topic} is an important subject with wide-ranging implications and applications.
-
-### Key Concepts
-- Concept 1: Foundation of understanding
-- Concept 2: Important principle
-- Concept 3: Practical application
-
-### Implementation
-Implementing knowledge of ${topic} requires:
-1. Understanding core principles
-2. Gaining practical experience
-3. Continuous learning and adaptation
-
-### Conclusion
-${topic} represents valuable knowledge for professional and personal development.`
-  }
-
-  return content
 }
 
 export async function POST(request: Request) {
@@ -146,50 +23,112 @@ export async function POST(request: Request) {
       return Response.json({ error: 'No topic provided' }, { status: 400 })
     }
 
-    let style = ''
+    let prompt = ''
 
     switch (docType) {
       case 'essay':
-        style = 'an academic essay with introduction, body paragraphs, and conclusion'
-        break
-      case 'email':
-        style = 'a professional email with proper greeting, body, and closing'
-        break
-      case 'report':
-        style = 'a formal report with sections, key findings, and recommendations'
-        break
-      case 'article':
-        style = 'an engaging blog article with a catchy introduction and informative content'
-        break
-      default:
-        style = 'a well-structured document'
-    }
+        prompt = `Write a comprehensive academic essay titled "${title}" about the following topic:
 
-    const prompt = `Write ${style}.
-
-Title: "${title}"
-Topic: "${topic}"
+${topic}
 
 Requirements:
-- Make it informative and well-structured
-- Use clear, professional language
-- Include relevant details and examples
-- Maintain proper formatting
+- Include an introduction that sets up the topic
+- Write multiple body paragraphs with detailed arguments
+- Include real-world examples and evidence
+- Write a strong conclusion that summarizes key points
+- Use academic language and proper essay structure
+- Make it informative and well-researched`
+        break
 
-Write the complete document:`
+      case 'email':
+        prompt = `Write a professional business email with the subject "${title}" about:
 
-    let content = ''
-    try {
-      content = await generateFreeText({
-        prompt,
-        system: 'You are a skilled professional writer. Produce well-structured, polished documents.',
-        temperature: 0.7,
-        retries: 3,
-      })
-    } catch (error) {
-      console.log('[v0] API service temporarily unavailable, using mock response')
-      content = generateMockDocument(title, topic, docType)
+${topic}
+
+Requirements:
+- Start with a professional greeting
+- Clearly state the purpose in the opening paragraph
+- Provide detailed information in the body
+- Include specific action items or next steps
+- End with a professional closing
+- Use formal business language
+- Keep it concise but informative`
+        break
+
+      case 'report':
+        prompt = `Write a professional report titled "${title}" on the following topic:
+
+${topic}
+
+Requirements:
+- Include an executive summary
+- Add relevant sections with headers
+- Include key findings or main points
+- Provide analysis and insights
+- Add recommendations or conclusions
+- Use professional report formatting
+- Include specific data points where appropriate`
+        break
+
+      case 'article':
+        prompt = `Write an engaging blog article titled "${title}" about:
+
+${topic}
+
+Requirements:
+- Start with a captivating introduction
+- Write informative content sections
+- Include practical tips or insights
+- Use conversational but professional tone
+- Include real-world examples
+- Add a compelling conclusion
+- Make it interesting and easy to read`
+        break
+
+      default:
+        prompt = `Write content titled "${title}" about: ${topic}`
     }
+
+    // Using Groq API
+    const groqApiKey = process.env.GROQ_API_KEY
+    if (!groqApiKey) {
+      return Response.json({ error: 'GROQ_API_KEY not configured' }, { status: 500 })
+    }
+
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${groqApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'mixtral-8x7b-32768',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a skilled professional writer. Produce well-structured, polished documents.',
+          },
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
+        max_tokens: 3000,
+        temperature: 0.7,
+      }),
+    })
+
+    if (!response.ok) {
+      const error = await response.text()
+      console.error('[v0] Groq API error:', error)
+      return Response.json(
+        { error: 'Failed to generate document' },
+        { status: 500 }
+      )
+    }
+
+    const data = await response.json()
+    const content = data.choices[0].message.content
 
     const saved = await trySave('written_documents', {
       title,
@@ -201,11 +140,15 @@ Write the complete document:`
     return Response.json({
       id: saved?.id ?? crypto.randomUUID(),
       content,
+      type: docType,
       createdAt: saved?.created_at ?? new Date().toISOString(),
     })
   } catch (error) {
-    console.error('Error:', error)
-    return Response.json({ error: 'Failed to generate document' }, { status: 500 })
+    console.error('[v0] Error in writer API:', error)
+    return Response.json(
+      { error: 'Failed to generate document' },
+      { status: 500 }
+    )
   }
 }
 
