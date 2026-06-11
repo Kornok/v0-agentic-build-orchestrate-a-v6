@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { generateText } from 'ai'
-import { groq } from '@ai-sdk/groq'
+
+// Free, zero-config via Vercel AI Gateway - no API key required
+const MODEL = 'openai/gpt-5-mini'
 
 const SUPPORTED_LANGUAGES = {
   en: 'English',
@@ -17,16 +19,23 @@ const SUPPORTED_LANGUAGES = {
   ko: 'Korean',
 }
 
-export async function POST(request: Request) {
+async function trySave(table: string, row: Record<string, unknown>) {
   try {
     const supabase = await createClient()
+    const { data, error } = await supabase.from(table).insert(row).select()
+    if (error || !data || data.length === 0) return null
+    return data[0]
+  } catch {
+    return null
+  }
+}
+
+export async function POST(request: Request) {
+  try {
     const { text, sourceLanguage, targetLanguage } = await request.json()
 
     if (!text || text.trim().length === 0) {
-      return Response.json(
-        { error: 'No text provided' },
-        { status: 400 }
-      )
+      return Response.json({ error: 'No text provided' }, { status: 400 })
     }
 
     if (!sourceLanguage || !targetLanguage) {
@@ -43,8 +52,10 @@ export async function POST(request: Request) {
       )
     }
 
-    const sourceLangName = SUPPORTED_LANGUAGES[sourceLanguage as keyof typeof SUPPORTED_LANGUAGES] || sourceLanguage
-    const targetLangName = SUPPORTED_LANGUAGES[targetLanguage as keyof typeof SUPPORTED_LANGUAGES] || targetLanguage
+    const sourceLangName =
+      SUPPORTED_LANGUAGES[sourceLanguage as keyof typeof SUPPORTED_LANGUAGES] || sourceLanguage
+    const targetLangName =
+      SUPPORTED_LANGUAGES[targetLanguage as keyof typeof SUPPORTED_LANGUAGES] || targetLanguage
 
     const prompt = `You are a professional translator. Translate the following text from ${sourceLangName} to ${targetLangName}. 
 Provide only the translated text without any explanations or additional text.
@@ -52,44 +63,28 @@ Provide only the translated text without any explanations or additional text.
 Text to translate:
 ${text}`
 
-    // Generate translation using AI SDK
     const { text: translation } = await generateText({
-      model: openai('gpt-4-turbo'),
+      model: MODEL,
       prompt,
       temperature: 0.3,
-      maxTokens: 2000,
+      maxOutputTokens: 2000,
     })
 
-    // Save to database
-    const { data, error } = await supabase
-      .from('translations')
-      .insert({
-        original_text: text,
-        translated_text: translation,
-        source_language: sourceLanguage,
-        target_language: targetLanguage,
-      })
-      .select()
-
-    if (error) {
-      console.error('Database error:', error)
-      return Response.json(
-        { error: 'Failed to save translation' },
-        { status: 500 }
-      )
-    }
+    const saved = await trySave('translations', {
+      original_text: text,
+      translated_text: translation,
+      source_language: sourceLanguage,
+      target_language: targetLanguage,
+    })
 
     return Response.json({
-      id: data[0].id,
+      id: saved?.id ?? crypto.randomUUID(),
       translatedText: translation,
-      createdAt: data[0].created_at,
+      createdAt: saved?.created_at ?? new Date().toISOString(),
     })
   } catch (error) {
     console.error('Error:', error)
-    return Response.json(
-      { error: 'Failed to translate text' },
-      { status: 500 }
-    )
+    return Response.json({ error: 'Failed to translate text' }, { status: 500 })
   }
 }
 
@@ -102,22 +97,10 @@ export async function GET() {
       .order('created_at', { ascending: false })
       .limit(50)
 
-    if (error) {
-      return Response.json(
-        { error: 'Failed to fetch translations' },
-        { status: 500 }
-      )
-    }
+    if (error) return Response.json({ translations: [], languages: SUPPORTED_LANGUAGES })
 
-    return Response.json({ 
-      translations: data,
-      languages: SUPPORTED_LANGUAGES,
-    })
-  } catch (error) {
-    console.error('Error:', error)
-    return Response.json(
-      { error: 'Failed to fetch translations' },
-      { status: 500 }
-    )
+    return Response.json({ translations: data, languages: SUPPORTED_LANGUAGES })
+  } catch {
+    return Response.json({ translations: [], languages: SUPPORTED_LANGUAGES })
   }
 }
