@@ -1,4 +1,5 @@
 import { generateFreeText, extractiveSummary } from '@/lib/free-ai'
+import { summarizeContent } from '@/lib/groq-service'
 import { createClient } from '@/lib/supabase/server'
 
 async function trySave(table: string, row: Record<string, unknown>) {
@@ -30,21 +31,29 @@ export async function POST(request: Request) {
 
     let summary = ''
     try {
-      summary = await generateFreeText({
-        prompt,
-        system: 'You are an expert summarizer. Respond only with the summary text.',
-        temperature: 0.5,
-        retries: 2,
-        onChunk: (chunk) => {
-          summary += chunk
-        },
-      })
-    } catch (err) {
-      console.error('AI summarization failed, using local fallback:', err)
-      summary = extractiveSummary(
+      // Use Groq AI for high-quality summarization
+      const response = await summarizeContent(
         text,
-        sentenceCounts[summaryLength as keyof typeof sentenceCounts] || 5
+        summaryLength as 'short' | 'medium' | 'long',
+        'key points and main ideas'
       )
+      summary = response.text
+    } catch (err) {
+      console.error('Groq summarization failed, trying fallback:', err)
+      try {
+        summary = await generateFreeText({
+          prompt,
+          system: 'You are an expert summarizer. Respond only with the summary text.',
+          temperature: 0.5,
+          retries: 2,
+        })
+      } catch (err2) {
+        console.error('All AI failed, using extractive fallback:', err2)
+        summary = extractiveSummary(
+          text,
+          sentenceCounts[summaryLength as keyof typeof sentenceCounts] || 5
+        )
+      }
     }
 
     const saved = await trySave('summaries', {

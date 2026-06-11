@@ -4,92 +4,109 @@ import React, { useState, useEffect } from 'react'
 import { MapPin, Phone, Globe, Star, Loader, Copy } from 'lucide-react'
 
 interface Service {
-  id: string
-  serviceType: string
+  id?: string
   name: string
-  address: string
-  phone: string
-  website: string
-  rating: number
-  description: string
+  distance?: string
+  address?: string
+  phone?: string
+  website?: string
+  rating?: number
+  description?: string
 }
 
-const SAMPLE_SERVICES: Service[] = [
-  {
-    id: '1',
-    serviceType: 'Hospital',
-    name: 'Central Medical Hospital',
-    address: '123 Health St, City, State',
-    phone: '555-0100',
-    website: 'https://example.com/hospital',
-    rating: 4.8,
-    description: 'Full-service medical hospital with emergency room',
-  },
-  {
-    id: '2',
-    serviceType: 'Restaurant',
-    name: 'Downtown Cafe',
-    address: '456 Main St, City, State',
-    phone: '555-0101',
-    website: 'https://example.com/cafe',
-    rating: 4.5,
-    description: 'Family-friendly restaurant with diverse menu',
-  },
-  {
-    id: '3',
-    serviceType: 'Gas Station',
-    name: 'QuickFuel Station',
-    address: '789 Oak Ave, City, State',
-    phone: '555-0102',
-    website: 'https://example.com/fuel',
-    rating: 4.2,
-    description: '24-hour gas station with convenience store',
-  },
-  {
-    id: '4',
-    serviceType: 'Pharmacy',
-    name: 'MediCare Pharmacy',
-    address: '321 Park Rd, City, State',
-    phone: '555-0103',
-    website: 'https://example.com/pharmacy',
-    rating: 4.7,
-    description: 'Full-service pharmacy with consultation services',
-  },
-  {
-    id: '5',
-    serviceType: 'Bank',
-    name: 'First National Bank',
-    address: '654 Financial Plaza, City, State',
-    phone: '555-0104',
-    website: 'https://example.com/bank',
-    rating: 4.3,
-    description: 'Full-service banking with ATM and loan services',
-  },
-  {
-    id: '6',
-    serviceType: 'Hotel',
-    name: 'Downtown Inn',
-    address: '987 Rest St, City, State',
-    phone: '555-0105',
-    website: 'https://example.com/hotel',
-    rating: 4.6,
-    description: 'Comfortable lodging with all amenities',
-  },
-]
+interface NearbyResponse {
+  services: Service[]
+  location?: { lat: number; lng: number }
+  weather?: { temperature: number; condition: string }
+}
 
-const SERVICE_TYPES = ['All', 'Hospital', 'Restaurant', 'Gas Station', 'Pharmacy', 'Bank', 'Hotel']
+const SERVICE_TYPES = ['All', 'Hospital', 'Police', 'Pharmacy', 'Restaurant', 'Cafe']
 
 export default function ServicesPage() {
-  const [selectedType, setSelectedType] = useState('All')
+  const [selectedType, setSelectedType] = useState('Hospital')
   const [searchQuery, setSearchQuery] = useState('')
-  const [services, setServices] = useState<Service[]>(SAMPLE_SERVICES)
+  const [services, setServices] = useState<Service[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [copied, setCopied] = useState<string | null>(null)
+  const [weather, setWeather] = useState<any>(null)
+  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null)
+
+  // Get user's location and fetch services
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        setLoading(true)
+        
+        // Try to get browser geolocation
+        let lat = 0, lng = 0
+        
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            async (position) => {
+              lat = position.coords.latitude
+              lng = position.coords.longitude
+              setLocation({ lat, lng })
+              
+              // Fetch services
+              const response = await fetch('/api/nearby-services', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                  lat, 
+                  lng, 
+                  serviceType: selectedType.toLowerCase() === 'all' ? 'hospital' : selectedType.toLowerCase(),
+                  radius: 5000
+                }),
+              })
+              const data: NearbyResponse = await response.json()
+              setServices(data.services || [])
+              setWeather(data.weather)
+            },
+            () => {
+              // Fallback if geolocation fails - use IP location
+              fetchWithIPLocation()
+            }
+          )
+        } else {
+          fetchWithIPLocation()
+        }
+      } catch (err) {
+        console.error('Error fetching services:', err)
+        setError('Unable to fetch services')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    const fetchWithIPLocation = async () => {
+      try {
+        const response = await fetch('/api/nearby-services', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            serviceType: selectedType.toLowerCase() === 'all' ? 'hospital' : selectedType.toLowerCase(),
+            radius: 5000
+          }),
+        })
+        const data: NearbyResponse = await response.json()
+        setServices(data.services || [])
+        setWeather(data.weather)
+        if (data.location) {
+          setLocation(data.location)
+        }
+      } catch (err) {
+        setError('Failed to fetch service data')
+      }
+    }
+
+    fetchServices()
+  }, [selectedType])
 
   const filteredServices = services.filter((service) => {
-    const typeMatch = selectedType === 'All' || service.serviceType === selectedType
     const searchMatch = service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                       service.address.toLowerCase().includes(searchQuery.toLowerCase())
-    return typeMatch && searchMatch
+                       service.address?.toLowerCase().includes(searchQuery.toLowerCase())
+    return searchMatch
   })
 
   const copyToClipboard = (text: string, id: string) => {
@@ -131,6 +148,23 @@ export default function ServicesPage() {
             </div>
           </div>
         </div>
+
+        {/* Loading State */}
+        {loading && (
+          <div className="bg-card border border-border rounded-lg p-6 mb-8 flex items-center gap-3">
+            <Loader className="w-4 h-4 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground">Finding nearby services...</p>
+          </div>
+        )}
+
+        {/* Weather Display */}
+        {weather && !loading && (
+          <div className="bg-secondary/30 border border-border rounded-lg p-4 mb-8">
+            <p className="text-sm text-foreground">
+              <span className="font-medium">Current Weather:</span> {weather.temperature}°C, {weather.condition} | Humidity: {weather.humidity}%
+            </p>
+          </div>
+        )}
 
         {/* Search and Filter */}
         <div className="bg-card border border-border rounded-lg p-6 mb-8">

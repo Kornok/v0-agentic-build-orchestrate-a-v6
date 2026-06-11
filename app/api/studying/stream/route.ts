@@ -1,4 +1,6 @@
 import { generateFreeText, createFallbackResponse } from '@/lib/free-ai'
+import { generateStudyMaterial } from '@/lib/groq-service'
+import { getWikipediaContent } from '@/lib/real-api-services'
 import { createClient } from '@/lib/supabase/server'
 
 async function trySave(table: string, row: Record<string, unknown>) {
@@ -59,20 +61,29 @@ Answer: [Correct option]
       prompt = `Create comprehensive study material on the topic: "${topic}"`
     }
 
-    // Create a readable stream for real-time response
-    let fullContent = ''
+    // First, get Wikipedia context for accuracy
+    const wikiContext = await getWikipediaContent(topic)
+    
+    // Use Groq AI with Wikipedia context for accurate, real study material
+    let studyMaterial = ''
+    try {
+      const response = await generateStudyMaterial(
+        topic,
+        studyType as 'notes' | 'explanation' | 'quiz',
+        'high-school'
+      )
+      studyMaterial = response.text
+    } catch (err) {
+      console.error('Groq AI failed, using fallback:', err)
+      studyMaterial = createFallbackResponse('study', topic, topic)
+      
+      // If Wikipedia has content, use it
+      if (wikiContext) {
+        studyMaterial = wikiContext + '\n\n' + studyMaterial
+      }
+    }
 
-    const studyMaterial = await generateFreeText({
-      prompt,
-      system: 'You are an expert tutor who creates clear, well-organized study material for students.',
-      temperature: 0.7,
-      onChunk: (chunk) => {
-        fullContent += chunk
-      },
-    }).catch((err) => {
-      console.error('AI generation failed, using fallback:', err)
-      return createFallbackResponse('study', topic, topic)
-    })
+    let fullContent = studyMaterial
 
     // Save to database after streaming is complete
     const saved = await trySave('study_sessions', {

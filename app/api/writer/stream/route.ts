@@ -1,4 +1,5 @@
 import { generateFreeText, createFallbackResponse } from '@/lib/free-ai'
+import { generateDocument } from '@/lib/groq-service'
 import { createClient } from '@/lib/supabase/server'
 
 async function trySave(table: string, row: Record<string, unknown>) {
@@ -59,19 +60,22 @@ Use formal language and clear structure.`
       prompt = `Write professional content about "${topic}" titled "${title}". Make it well-structured and engaging.`
     }
 
-    let fullContent = ''
+    // Use Groq AI for professional document generation
+    let content = ''
+    try {
+      const response = await generateDocument(
+        title,
+        docType as 'essay' | 'email' | 'report' | 'article',
+        topic,
+        'professional'
+      )
+      content = response.text
+    } catch (err) {
+      console.error('Groq AI failed, using fallback:', err)
+      content = createFallbackResponse('essay', topic, title)
+    }
 
-    const content = await generateFreeText({
-      prompt,
-      system: 'You are a skilled professional writer. Produce well-structured, polished documents.',
-      temperature: 0.7,
-      onChunk: (chunk) => {
-        fullContent += chunk
-      },
-    }).catch((err) => {
-      console.error('AI generation failed, using fallback:', err)
-      return createFallbackResponse('essay', topic, title)
-    })
+    let fullContent = content
 
     const saved = await trySave('written_documents', {
       title,

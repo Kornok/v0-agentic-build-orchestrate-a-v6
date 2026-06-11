@@ -1,4 +1,5 @@
 import { translateFree, createFallbackResponse } from '@/lib/free-ai'
+import { translateWithLibreTranslate, translateWithMyMemory } from '@/lib/real-api-services'
 import { createClient } from '@/lib/supabase/server'
 
 async function trySave(table: string, row: Record<string, unknown>) {
@@ -28,12 +29,25 @@ export async function POST(request: Request) {
       })
     }
 
+    // Try real translation APIs with fallbacks
     let translation = ''
-    try {
-      translation = await translateFree(text, sourceLanguage, targetLanguage)
-    } catch (err) {
-      console.error('Translation service failed, using fallback:', err)
-      translation = createFallbackResponse('translation', text)
+    
+    // Try LibreTranslate first (free, no auth required)
+    translation = await translateWithLibreTranslate(text, sourceLanguage, targetLanguage)
+    
+    // If LibreTranslate fails, try MyMemory
+    if (!translation) {
+      translation = await translateWithMyMemory(text, sourceLanguage, targetLanguage)
+    }
+    
+    // Last resort: use old method
+    if (!translation) {
+      try {
+        translation = await translateFree(text, sourceLanguage, targetLanguage)
+      } catch (err) {
+        console.error('All translation services failed:', err)
+        translation = createFallbackResponse('translation', text)
+      }
     }
 
     const saved = await trySave('translations', {

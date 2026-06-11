@@ -1,86 +1,55 @@
 'use client'
 
-import React, { useState } from 'react'
-import { Phone, Globe, MapPin, AlertCircle, Copy } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { Phone, Globe, MapPin, AlertCircle, Copy, Loader } from 'lucide-react'
 
 interface EmergencyContact {
   id: string
   category: string
   title: string
   phone: string
-  website: string
+  website?: string
   description: string
 }
 
-const EMERGENCY_CONTACTS: EmergencyContact[] = [
-  {
-    id: '1',
-    category: 'Police',
-    title: 'Emergency Police',
-    phone: '911',
-    website: 'https://www.fbi.gov',
-    description: 'Call for police assistance in emergencies',
-  },
-  {
-    id: '2',
-    category: 'Medical',
-    title: 'Emergency Medical Services',
-    phone: '911',
-    website: 'https://www.cdc.gov',
-    description: 'Call for medical emergency assistance',
-  },
-  {
-    id: '3',
-    category: 'Fire',
-    title: 'Fire Department',
-    phone: '911',
-    website: 'https://www.usfa.fema.gov',
-    description: 'Call for fire-related emergencies',
-  },
-  {
-    id: '4',
-    category: 'Mental Health',
-    title: 'National Suicide Prevention Lifeline',
-    phone: '988',
-    website: 'https://suicidepreventionlifeline.org',
-    description: 'Free, confidential support 24/7',
-  },
-  {
-    id: '5',
-    category: 'Poison',
-    title: 'Poison Control',
-    phone: '1-800-222-1222',
-    website: 'https://www.poison.org',
-    description: 'Call for poison or toxic substance emergencies',
-  },
-  {
-    id: '6',
-    category: 'Disaster',
-    title: 'Federal Emergency Management Agency',
-    phone: '1-800-621-3362',
-    website: 'https://www.fema.gov',
-    description: 'Assistance for natural disasters and emergencies',
-  },
-  {
-    id: '7',
-    category: 'Domestic Violence',
-    title: 'National Domestic Violence Hotline',
-    phone: '1-800-799-7233',
-    website: 'https://www.thehotline.org',
-    description: 'Support for domestic violence victims',
-  },
-  {
-    id: '8',
-    category: 'Lost Person',
-    title: 'National Center for Missing & Exploited Children',
-    phone: '1-800-843-5678',
-    website: 'https://www.missingkids.org',
-    description: 'Assistance for missing persons',
-  },
-]
+interface RealEmergencyData {
+  police: string
+  ambulance: string
+  fire: string
+  counseling: string
+  poison: string
+  country?: string
+}
 
 export default function EmergencyPage() {
   const [copied, setCopied] = useState<string | null>(null)
+  const [emergencyData, setEmergencyData] = useState<RealEmergencyData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [countryCode, setCountryCode] = useState('US')
+
+  // Fetch real emergency data on mount
+  useEffect(() => {
+    const fetchEmergencyData = async () => {
+      try {
+        setLoading(true)
+        const response = await fetch('/api/emergency-services', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ countryCode }),
+        })
+        const data = await response.json()
+        setEmergencyData(data)
+        setCountryCode(data.country || 'US')
+      } catch (err) {
+        setError('Failed to fetch emergency data')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchEmergencyData()
+  }, [])
 
   const copyToClipboard = (text: string, id: string) => {
     navigator.clipboard.writeText(text)
@@ -92,7 +61,51 @@ export default function EmergencyPage() {
     window.location.href = `tel:${phone}`
   }
 
-  const groupedContacts = EMERGENCY_CONTACTS.reduce((acc, contact) => {
+  // Build emergency contacts from real data
+  const buildContacts = (): EmergencyContact[] => {
+    if (!emergencyData) return []
+    
+    return [
+      {
+        id: '1',
+        category: 'Police',
+        title: 'Emergency Police',
+        phone: emergencyData.police,
+        description: 'Call for police assistance in emergencies',
+      },
+      {
+        id: '2',
+        category: 'Medical',
+        title: 'Emergency Medical Services',
+        phone: emergencyData.ambulance,
+        description: 'Call for medical emergency assistance',
+      },
+      {
+        id: '3',
+        category: 'Fire',
+        title: 'Fire Department',
+        phone: emergencyData.fire,
+        description: 'Call for fire-related emergencies',
+      },
+      {
+        id: '4',
+        category: 'Mental Health',
+        title: 'Mental Health Crisis Support',
+        phone: emergencyData.counseling,
+        description: 'Free, confidential mental health support 24/7',
+      },
+      {
+        id: '5',
+        category: 'Poison',
+        title: 'Poison Control',
+        phone: emergencyData.poison,
+        description: 'Call for poison or toxic substance emergencies',
+      },
+    ]
+  }
+
+  const contacts = buildContacts()
+  const groupedContacts = contacts.reduce((acc, contact) => {
     if (!acc[contact.category]) {
       acc[contact.category] = []
     }
@@ -116,10 +129,18 @@ export default function EmergencyPage() {
           </div>
         </div>
 
+        {/* Loading State */}
+        {loading && (
+          <div className="bg-card border border-border rounded-lg p-6 mb-8 flex items-center gap-3">
+            <Loader className="w-4 h-4 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground">Loading emergency contacts for your location...</p>
+          </div>
+        )}
+
         {/* Warning Banner */}
         <div className="bg-destructive/10 border-2 border-destructive rounded-lg p-6 mb-8">
           <p className="text-sm text-destructive font-light">
-            In a life-threatening emergency, always call 911 first. These resources are supplementary information only.
+            In a life-threatening emergency, call {emergencyData?.police || '911'} immediately. These resources are supplementary information only.
           </p>
         </div>
 
