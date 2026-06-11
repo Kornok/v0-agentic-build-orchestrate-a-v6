@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
 import { generateText } from 'ai'
-import { groq } from '@ai-sdk/groq'
 
 const SUPPORTED_LANGUAGES = {
   en: 'English',
@@ -54,10 +53,10 @@ ${text}`
 
     // Generate translation using AI SDK
     const { text: translation } = await generateText({
-      model: openai('gpt-4-turbo'),
+      model: 'openai/gpt-4o-mini',
       prompt,
       temperature: 0.3,
-      maxTokens: 2000,
+      maxOutputTokens: 2000,
     })
 
     // Save to database
