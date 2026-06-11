@@ -2,7 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { FileText, Languages, Calendar, BarChart3, Mic, AlertCircle, MapPin, ArrowRight, BookOpen, PenTool } from 'lucide-react'
+import { Languages, Calendar, BarChart3, Mic, AlertCircle, MapPin, ArrowRight, BookOpen, PenTool } from 'lucide-react'
 
 export default function DashboardPage() {
   const features = [
@@ -17,12 +17,6 @@ export default function DashboardPage() {
       description: 'Generate professional documents, essays, and content effortlessly.',
       icon: PenTool,
       href: '/dashboard/writer',
-    },
-    {
-      title: 'Document Summarizer',
-      description: 'Extract key points and generate concise summaries from long documents.',
-      icon: FileText,
-      href: '/dashboard/summarizer',
     },
     {
       title: 'Language Translator',
