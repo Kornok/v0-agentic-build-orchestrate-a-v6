@@ -13,7 +13,7 @@ export async function getWikipediaContent(topic: string): Promise<string> {
     const data = await response.json()
     return data.extract || data.description || `Information about ${topic}`
   } catch {
-    return null
+    return `Information about ${topic} is currently unavailable.`
   }
 }
 
