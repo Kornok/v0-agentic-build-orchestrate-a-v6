@@ -2,10 +2,22 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { FileText, Languages, Calendar, BarChart3, Mic, AlertCircle, MapPin, ArrowRight } from 'lucide-react'
+import { FileText, Languages, Calendar, BarChart3, Mic, AlertCircle, MapPin, ArrowRight, BookOpen, PenTool } from 'lucide-react'
 
 export default function DashboardPage() {
   const features = [
+    {
+      title: 'Studying Assistant',
+      description: 'Study smarter with AI-powered summaries, notes, and explanations.',
+      icon: BookOpen,
+      href: '/dashboard/studying',
+    },
+    {
+      title: 'Document Writer',
+      description: 'Generate professional documents, essays, and content effortlessly.',
+      icon: PenTool,
+      href: '/dashboard/writer',
+    },
     {
       title: 'Document Summarizer',
       description: 'Extract key points and generate concise summaries from long documents.',
