@@ -17,65 +17,57 @@ const EMERGENCY_CONTACTS: EmergencyContact[] = [
     id: '1',
     category: 'Police',
     title: 'Emergency Police',
-    phone: '911',
-    website: 'https://www.fbi.gov',
+    phone: '999',
+    website: 'https://www.police.gov.bd/en/hot_line_number',
     description: 'Call for police assistance in emergencies',
   },
   {
     id: '2',
     category: 'Medical',
     title: 'Emergency Medical Services',
-    phone: '911',
-    website: 'https://www.cdc.gov',
+    phone: '16263',
+    website: 'https://old.dghs.gov.bd/index.php/en/home/2551-government-and-non-government-ambulance-enlist-notice',
     description: 'Call for medical emergency assistance',
   },
   {
     id: '3',
     category: 'Fire',
     title: 'Fire Department',
-    phone: '911',
-    website: 'https://www.usfa.fema.gov',
+    phone: '102',
+    website: 'https://fireservice.gov.bd/pages/static-pages/6922dcc6933eb65569e11fd1',
     description: 'Call for fire-related emergencies',
   },
   {
     id: '4',
     category: 'Mental Health',
-    title: 'National Suicide Prevention Lifeline',
-    phone: '988',
-    website: 'https://suicidepreventionlifeline.org',
-    description: 'Free, confidential support 24/7',
+    title: 'Mental Health Support',
+    phone: '999',
+    website: 'https://shuni.org/',
+    description: 'Support for mental health emergencies',
   },
   {
     id: '5',
     category: 'Poison',
     title: 'Poison Control',
-    phone: '1-800-222-1222',
-    website: 'https://www.poison.org',
+    phone: '16801',
+    website: 'https://tsb.org.bd/index.php/user/tsb/project_researchers/Help%20Line%20Number-%2016801',
     description: 'Call for poison or toxic substance emergencies',
   },
   {
     id: '6',
     category: 'Disaster',
-    title: 'Federal Emergency Management Agency',
-    phone: '1-800-621-3362',
-    website: 'https://www.fema.gov',
+    title: 'Disaster Management',
+    phone: '1090',
+    website: 'https://rapid.ddm.gov.bd/service/dmcportal',
     description: 'Assistance for natural disasters and emergencies',
   },
   {
     id: '7',
     category: 'Domestic Violence',
-    title: 'National Domestic Violence Hotline',
-    phone: '1-800-799-7233',
-    website: 'https://www.thehotline.org',
+    title: 'Domestic Violence Support',
+    phone: '1098',
+    website: 'https://findahelpline.com/countries/bd/topics/abuse-domestic-violence',
     description: 'Support for domestic violence victims',
-  },
-  {
-    id: '8',
-    category: 'Lost Person',
-    title: 'National Center for Missing & Exploited Children',
-    phone: '1-800-843-5678',
-    website: 'https://www.missingkids.org',
-    description: 'Assistance for missing persons',
   },
 ]
 
@@ -119,7 +111,7 @@ export default function EmergencyPage() {
         {/* Warning Banner */}
         <div className="bg-destructive/10 border-2 border-destructive rounded-lg p-6 mb-8">
           <p className="text-sm text-destructive font-light">
-            In a life-threatening emergency, always call 911 first. These resources are supplementary information only.
+            In a life-threatening emergency, always call 999 first. These resources are supplementary information only.
           </p>
         </div>
 
