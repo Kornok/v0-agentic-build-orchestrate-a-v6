@@ -24,7 +24,7 @@ async function generateWithGroq(prompt: string, systemPrompt: string): Promise<s
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'mixtral-8x7b-32768',
+      model: 'llama-3.3-70b-versatile',
       messages: [
         {
           role: 'system',
@@ -41,7 +41,9 @@ async function generateWithGroq(prompt: string, systemPrompt: string): Promise<s
   })
 
   if (!response.ok) {
-    throw new Error(`Groq API error: ${response.statusText}`)
+    const errorData = await response.json().catch(() => ({}))
+    console.error('[v0] Groq API error response:', errorData)
+    throw new Error(`Groq API error: ${response.status} ${JSON.stringify(errorData)}`)
   }
 
   const data = await response.json()
