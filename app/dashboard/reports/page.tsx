@@ -27,6 +27,7 @@ export default function ReportsPage() {
   const [reports, setReports] = useState<Report[]>([])
   const [error, setError] = useState('')
   const [copied, setCopied] = useState<string | null>(null)
+  const [reportPreview, setReportPreview] = useState('')
 
   useEffect(() => {
     fetchReports()
@@ -45,6 +46,7 @@ export default function ReportsPage() {
   const handleGenerateReport = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setReportPreview('')
 
     if (!title || !content) {
       setError('Please fill in all fields')
@@ -53,7 +55,7 @@ export default function ReportsPage() {
 
     setLoading(true)
     try {
-      const response = await fetch('/api/report', {
+      const response = await fetch('/api/report/stream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, content, reportType }),
@@ -67,11 +69,20 @@ export default function ReportsPage() {
         return
       }
 
+      // Show preview while adding to list
+      const reportContent = data.content || ''
+      let displayed = ''
+      for (let i = 0; i < reportContent.length; i += 3) {
+        displayed = reportContent.slice(0, i)
+        setReportPreview(displayed)
+        await new Promise(resolve => setTimeout(resolve, 10))
+      }
+
       setReports([
         {
           id: data.id,
           title,
-          content: data.content,
+          content: reportContent,
           report_type: reportType,
           generated_at: data.createdAt,
         },
@@ -194,6 +205,17 @@ export default function ReportsPage() {
             </button>
           </form>
         </div>
+
+        {/* Report Preview */}
+        {reportPreview && (
+          <div className="bg-card border border-primary/20 rounded-lg p-6 mb-8 animate-pulse">
+            <h2 className="text-lg font-light text-foreground mb-4">Generating Report...</h2>
+            <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
+              {reportPreview}
+              <span className="animate-blink">|</span>
+            </p>
+          </div>
+        )}
 
         {/* Reports List */}
         {reports.length > 0 && (

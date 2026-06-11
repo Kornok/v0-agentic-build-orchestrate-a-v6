@@ -33,6 +33,7 @@ export default function SchedulerPage() {
   const [schedules, setSchedules] = useState<Schedule[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [saving, setSaving] = useState<string | null>(null)
 
   // Fetch schedules on load
   useEffect(() => {
@@ -64,6 +65,25 @@ export default function SchedulerPage() {
     }
 
     setLoading(true)
+    
+    // Create optimistic schedule item
+    const optimisticId = crypto.randomUUID()
+    const optimisticSchedule: Schedule = {
+      id: optimisticId,
+      title,
+      description,
+      start_time: startTime,
+      end_time: endTime,
+      category,
+      priority,
+      completed: false,
+      created_at: new Date().toISOString(),
+    }
+
+    // Show immediately (optimistic update)
+    setSchedules([optimisticSchedule, ...schedules])
+    setSaving(optimisticId)
+
     try {
       const response = await fetch('/api/schedule', {
         method: 'POST',
@@ -82,19 +102,27 @@ export default function SchedulerPage() {
 
       if (!response.ok) {
         setError(data.error || 'Failed to create schedule')
+        // Remove optimistic item on error
+        setSchedules(schedules.filter(s => s.id !== optimisticId))
         setLoading(false)
+        setSaving(null)
         return
       }
 
-      setSchedules([...schedules, data])
+      // Replace optimistic item with real one
+      setSchedules(schedules.map(s => s.id === optimisticId ? data : s))
       setTitle('')
       setDescription('')
       setStartTime('')
       setEndTime('')
       setCategory('General')
       setPriority('medium')
+      setSaving(null)
     } catch (err) {
       setError('Error: ' + (err instanceof Error ? err.message : 'Unknown error'))
+      // Remove optimistic item on error
+      setSchedules(schedules.filter(s => s.id !== optimisticId))
+      setSaving(null)
     } finally {
       setLoading(false)
     }
@@ -303,7 +331,7 @@ export default function SchedulerPage() {
             <h2 className="text-lg font-light text-foreground mb-4">Upcoming ({upcomingSchedules.length})</h2>
             <div className="space-y-3">
               {upcomingSchedules.map((schedule) => (
-                <div key={schedule.id} className="bg-card border border-border rounded-lg p-4">
+                <div key={schedule.id} className={`bg-card border rounded-lg p-4 transition-all ${saving === schedule.id ? 'border-primary/50 bg-primary/5 animate-pulse' : 'border-border'}`}>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">

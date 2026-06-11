@@ -17,6 +17,8 @@ interface GenerateOptions {
   temperature?: number
   /** Number of upstream attempts before falling back. */
   retries?: number
+  /** If provided, stream response chunks to this callback. */
+  onChunk?: (chunk: string) => void
 }
 
 /**
@@ -28,6 +30,7 @@ export async function generateFreeText({
   system,
   temperature = 0.7,
   retries = 3,
+  onChunk,
 }: GenerateOptions): Promise<string> {
   const messages = [
     ...(system ? [{ role: 'system', content: system }] : []),
@@ -64,7 +67,19 @@ export async function generateFreeText({
       }
 
       const text = body.trim()
-      if (text.length > 0) return text
+      if (text.length > 0) {
+        // Call onChunk for real-time streaming if provided
+        if (onChunk) {
+          // Simulate streaming by splitting into sentences
+          const sentences = text.match(/[^.!?]+[.!?]+/g) || [text]
+          for (const sentence of sentences) {
+            onChunk(sentence.trim() + ' ')
+            // Small delay for realistic streaming feel
+            await sleep(50)
+          }
+        }
+        return text
+      }
 
       lastError = new Error('Empty response from Pollinations')
     } catch (err) {

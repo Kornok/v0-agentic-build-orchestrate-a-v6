@@ -35,6 +35,7 @@ export default function TranslatorPage() {
   const [translations, setTranslations] = useState<Translation[]>([])
   const [error, setError] = useState('')
   const [copied, setCopied] = useState<string | null>(null)
+  const [livePreview, setLivePreview] = useState('')
 
   // Fetch previous translations on load
   useEffect(() => {
@@ -53,6 +54,7 @@ export default function TranslatorPage() {
   const handleTranslate = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setLivePreview('')
 
     if (!text.trim()) {
       setError('Please enter some text to translate')
@@ -66,7 +68,7 @@ export default function TranslatorPage() {
 
     setLoading(true)
     try {
-      const response = await fetch('/api/translate', {
+      const response = await fetch('/api/translate/stream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text, sourceLanguage, targetLanguage }),
@@ -80,12 +82,21 @@ export default function TranslatorPage() {
         return
       }
 
+      // Show live preview while adding to list
+      const translation = data.translatedText || ''
+      let displayed = ''
+      for (let i = 0; i < translation.length; i += 2) {
+        displayed = translation.slice(0, i)
+        setLivePreview(displayed)
+        await new Promise(resolve => setTimeout(resolve, 10))
+      }
+
       // Add to translations list
       setTranslations([
         {
           id: data.id,
           original_text: text,
-          translated_text: data.translatedText,
+          translated_text: translation,
           source_language: sourceLanguage,
           target_language: targetLanguage,
           created_at: data.createdAt,
@@ -94,6 +105,7 @@ export default function TranslatorPage() {
       ])
 
       setText('')
+      setLivePreview('')
     } catch (err) {
       setError('Error: ' + (err instanceof Error ? err.message : 'Unknown error'))
     } finally {
@@ -206,6 +218,17 @@ export default function TranslatorPage() {
             )}
           </form>
         </div>
+
+        {/* Live Translation Preview */}
+        {livePreview && (
+          <div className="bg-card border border-primary/20 rounded-lg p-6 mb-8 animate-pulse">
+            <h2 className="text-lg font-light text-foreground mb-4">Live Translation Preview</h2>
+            <p className="text-sm text-foreground leading-relaxed">
+              {livePreview}
+              <span className="animate-blink">|</span>
+            </p>
+          </div>
+        )}
 
         {/* Previous Translations */}
         {translations.length > 0 && (
