@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/server'
-import { generateFreeText } from '@/lib/free-ai'
 
 async function trySave(table: string, row: Record<string, unknown>) {
   try {
@@ -10,6 +9,45 @@ async function trySave(table: string, row: Record<string, unknown>) {
   } catch {
     return null
   }
+}
+
+async function generateWithGroq(prompt: string, systemPrompt: string): Promise<string> {
+  const apiKey = process.env.GROQ_API_KEY_3
+  if (!apiKey) {
+    throw new Error('GROQ_API_KEY_3 is not configured')
+  }
+
+  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'llama-3.3-70b-versatile',
+      messages: [
+        {
+          role: 'system',
+          content: systemPrompt,
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+      max_tokens: 2000,
+      temperature: 0.7,
+    }),
+  })
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}))
+    console.error('[v0] Groq API error response:', errorData)
+    throw new Error(`Groq API error: ${response.status} ${JSON.stringify(errorData)}`)
+  }
+
+  const data = await response.json()
+  return data.choices[0].message.content
 }
 
 export async function POST(request: Request) {
@@ -23,64 +61,72 @@ export async function POST(request: Request) {
     let prompt = ''
 
     if (studyType === 'notes') {
-      prompt = `Create comprehensive study notes on the topic: "${topic}"
-      
+      prompt = `Create comprehensive study notes about "${topic}". 
+
 Include:
 - Key concepts and definitions
 - Important facts and figures
 - Main points to remember
-- Examples
+- Real-world examples
+- Summary of important ideas
 
-Format the notes in a clear, organized manner.`
+Format it clearly with headers and bullet points for easy studying.`
     } else if (studyType === 'explanation') {
-      prompt = `Provide a detailed explanation of: "${topic}"
+      prompt = `Provide a detailed, broad explanation of "${topic}". 
 
 Include:
-- What it is
-- How it works
+- What it is (clear definition)
+- How it works (detailed explanation)
 - Why it's important
-- Real-world applications
+- Real-world applications and use cases
 - Related concepts
+- Key takeaways
 
-Make it easy to understand for a student.`
+Make it easy to understand for someone learning this for the first time.`
     } else if (studyType === 'quiz') {
-      prompt = `Create 5 practice quiz questions about: "${topic}"
+      prompt = `Create a practice quiz with Multiple Choice Questions (MCQs) about "${topic}".
 
-Format:
+Requirements:
+- Generate between 10-15 practice questions
+- Each question should have 4 options (A, B, C, D)
+- Include the correct answer for each question
+- Questions should cover different aspects of the topic
+- Format each question clearly
+
+Format example:
 Question 1: [Question text]
-A) [Option A]
-B) [Option B]
-C) [Option C]
-D) [Option D]
-Answer: [Correct option]
-
-[Repeat for all 5 questions]`
+A) Option 1
+B) Option 2
+C) Option 3
+D) Option 4
+Answer: B`
     } else {
-      prompt = `Create comprehensive study material on the topic: "${topic}"`
+      prompt = `Create comprehensive study material about "${topic}"`
     }
 
-    const studyMaterial = await generateFreeText({
+    const studyMaterial = await generateWithGroq(
       prompt,
-      system: 'You are an expert tutor who creates clear, well-organized study material for students.',
-      temperature: 0.7,
-    })
+      'You are an expert tutor who creates clear, well-organized study material for students.'
+    )
 
     const saved = await trySave('study_sessions', {
       topic,
       notes: studyMaterial,
-      explanation: studyMaterial,
       study_type: studyType,
     })
 
     return Response.json({
       id: saved?.id ?? crypto.randomUUID(),
-      notes: studyMaterial,
-      explanation: studyMaterial,
+      content: studyMaterial,
+      type: studyType,
       createdAt: saved?.created_at ?? new Date().toISOString(),
     })
   } catch (error) {
-    console.error('Error:', error)
-    return Response.json({ error: 'Failed to generate study material' }, { status: 500 })
+    console.error('[v0] Error in studying API:', error)
+    return Response.json(
+      { error: 'Failed to generate study material', details: String(error) },
+      { status: 500 }
+    )
   }
 }
 

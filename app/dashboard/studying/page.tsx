@@ -6,8 +6,8 @@ import { Copy, Loader, Trash2, BookOpen } from 'lucide-react'
 interface StudySession {
   id: string
   topic: string
-  notes: string
-  explanation: string
+  content: string
+  studyType: 'notes' | 'explanation' | 'quiz'
   created_at: string
 }
 
@@ -48,8 +48,8 @@ export default function StudyingPage() {
         {
           id: data.id,
           topic,
-          notes: data.notes,
-          explanation: data.explanation,
+          content: data.content,
+          studyType,
           created_at: data.createdAt,
         },
         ...sessions,
@@ -72,6 +72,19 @@ export default function StudyingPage() {
 
   const deleteSession = (id: string) => {
     setSessions(sessions.filter((s) => s.id !== id))
+  }
+
+  const getStudyTypeLabel = (type: 'notes' | 'explanation' | 'quiz') => {
+    switch (type) {
+      case 'notes':
+        return 'Study Notes'
+      case 'explanation':
+        return 'Detailed Explanation'
+      case 'quiz':
+        return 'Practice Quiz'
+      default:
+        return 'Study Material'
+    }
   }
 
   return (
@@ -147,19 +160,16 @@ export default function StudyingPage() {
             <div className="space-y-4">
               {sessions.map((session) => (
                 <div key={session.id} className="bg-card border border-border rounded-lg p-6">
-                  <h3 className="font-light text-foreground text-lg mb-4">{session.topic}</h3>
-
-                  <div className="mb-4">
-                    <h4 className="font-light text-foreground text-sm mb-2">Notes:</h4>
-                    <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                      {session.notes}
-                    </p>
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <h3 className="font-light text-foreground text-lg">{session.topic}</h3>
+                      <p className="text-xs text-muted-foreground mt-1">{getStudyTypeLabel(session.studyType)}</p>
+                    </div>
                   </div>
 
                   <div className="mb-4">
-                    <h4 className="font-light text-foreground text-sm mb-2">Explanation:</h4>
                     <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
-                      {session.explanation}
+                      {session.content}
                     </p>
                   </div>
 
@@ -167,9 +177,9 @@ export default function StudyingPage() {
                     <span>{new Date(session.created_at).toLocaleString()}</span>
                     <div className="flex gap-2">
                       <button
-                        onClick={() => copyToClipboard(`${session.notes}\n\n${session.explanation}`, session.id)}
+                        onClick={() => copyToClipboard(session.content, session.id)}
                         className="p-2 hover:bg-secondary rounded-lg transition-colors"
-                        title="Copy notes"
+                        title="Copy content"
                       >
                         <Copy className={`w-4 h-4 ${copied === session.id ? 'text-primary' : 'text-muted-foreground'}`} />
                       </button>

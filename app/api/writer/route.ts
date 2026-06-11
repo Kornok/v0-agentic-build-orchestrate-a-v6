@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/server'
-import { generateFreeText } from '@/lib/free-ai'
 
 async function trySave(table: string, row: Record<string, unknown>) {
   try {
@@ -10,6 +9,45 @@ async function trySave(table: string, row: Record<string, unknown>) {
   } catch {
     return null
   }
+}
+
+async function generateWithGroq(prompt: string, systemPrompt: string): Promise<string> {
+  const apiKey = process.env.GROQ_API_KEY_3
+  if (!apiKey) {
+    throw new Error('GROQ_API_KEY_3 is not configured')
+  }
+
+  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'llama-3.3-70b-versatile',
+      messages: [
+        {
+          role: 'system',
+          content: systemPrompt,
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+      max_tokens: 3000,
+      temperature: 0.7,
+    }),
+  })
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}))
+    console.error('[v0] Groq API error response:', errorData)
+    throw new Error(`Groq API error: ${response.status} ${JSON.stringify(errorData)}`)
+  }
+
+  const data = await response.json()
+  return data.choices[0].message.content
 }
 
 export async function POST(request: Request) {
@@ -24,43 +62,76 @@ export async function POST(request: Request) {
       return Response.json({ error: 'No topic provided' }, { status: 400 })
     }
 
-    let style = ''
+    let prompt = ''
 
     switch (docType) {
       case 'essay':
-        style = 'an academic essay with introduction, body paragraphs, and conclusion'
-        break
-      case 'email':
-        style = 'a professional email with proper greeting, body, and closing'
-        break
-      case 'report':
-        style = 'a formal report with sections, key findings, and recommendations'
-        break
-      case 'article':
-        style = 'an engaging blog article with a catchy introduction and informative content'
-        break
-      default:
-        style = 'a well-structured document'
-    }
+        prompt = `Write a comprehensive academic essay titled "${title}" about the following topic:
 
-    const prompt = `Write ${style}.
-
-Title: "${title}"
-Topic: "${topic}"
+${topic}
 
 Requirements:
-- Make it informative and well-structured
-- Use clear, professional language
-- Include relevant details and examples
-- Maintain proper formatting
+- Include an introduction that sets up the topic
+- Write multiple body paragraphs with detailed arguments
+- Include real-world examples and evidence
+- Write a strong conclusion that summarizes key points
+- Use academic language and proper essay structure
+- Make it informative and well-researched`
+        break
 
-Write the complete document:`
+      case 'email':
+        prompt = `Write a professional business email with the subject "${title}" about:
 
-    const content = await generateFreeText({
+${topic}
+
+Requirements:
+- Start with a professional greeting
+- Clearly state the purpose in the opening paragraph
+- Provide detailed information in the body
+- Include specific action items or next steps
+- End with a professional closing
+- Use formal business language
+- Keep it concise but informative`
+        break
+
+      case 'report':
+        prompt = `Write a professional report titled "${title}" on the following topic:
+
+${topic}
+
+Requirements:
+- Include an executive summary
+- Add relevant sections with headers
+- Include key findings or main points
+- Provide analysis and insights
+- Add recommendations or conclusions
+- Use professional report formatting
+- Include specific data points where appropriate`
+        break
+
+      case 'article':
+        prompt = `Write an engaging blog article titled "${title}" about:
+
+${topic}
+
+Requirements:
+- Start with a captivating introduction
+- Write informative content sections
+- Include practical tips or insights
+- Use conversational but professional tone
+- Include real-world examples
+- Add a compelling conclusion
+- Make it interesting and easy to read`
+        break
+
+      default:
+        prompt = `Write content titled "${title}" about: ${topic}`
+    }
+
+    const content = await generateWithGroq(
       prompt,
-      system: 'You are a skilled professional writer. Produce well-structured, polished documents.',
-      temperature: 0.7,
-    })
+      'You are a skilled professional writer. Produce well-structured, polished documents.'
+    )
 
     const saved = await trySave('written_documents', {
       title,
@@ -72,11 +143,15 @@ Write the complete document:`
     return Response.json({
       id: saved?.id ?? crypto.randomUUID(),
       content,
+      type: docType,
       createdAt: saved?.created_at ?? new Date().toISOString(),
     })
   } catch (error) {
-    console.error('Error:', error)
-    return Response.json({ error: 'Failed to generate document' }, { status: 500 })
+    console.error('[v0] Error in writer API:', error)
+    return Response.json(
+      { error: 'Failed to generate document' },
+      { status: 500 }
+    )
   }
 }
 
