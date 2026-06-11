@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { generateText } from 'ai'
-import { openai } from '@ai-sdk/openai'
+import { groq } from '@ai-sdk/groq'
 
 const SUPPORTED_LANGUAGES = {
   en: 'English',
