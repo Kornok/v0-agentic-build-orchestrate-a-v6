@@ -1,7 +1,14 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Suspense } from 'react'
 import { MapPin, Phone, Globe, Star, Loader, Copy } from 'lucide-react'
+import dynamic from 'next/dynamic'
+
+// Dynamically import map component to avoid SSR issues
+const ServiceMap = dynamic(() => import('@/components/service-map').then(mod => ({ default: mod.ServiceMap })), {
+  ssr: false,
+  loading: () => <div className="w-full h-96 bg-secondary rounded-lg flex items-center justify-center text-muted-foreground">Loading map...</div>
+})
 
 interface Service {
   id?: string
@@ -207,6 +214,16 @@ export default function ServicesPage() {
           </div>
         </div>
 
+        {/* Map View */}
+        {location && filteredServices.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-lg font-light text-foreground mb-4">Map View</h2>
+            <Suspense fallback={<div className="w-full h-96 bg-secondary rounded-lg flex items-center justify-center">Loading map...</div>}>
+              <ServiceMap services={filteredServices} userLocation={location} zoom={14} />
+            </Suspense>
+          </div>
+        )}
+
         {/* Services Grid */}
         <div>
           <h2 className="text-lg font-light text-foreground mb-4">
@@ -215,8 +232,8 @@ export default function ServicesPage() {
 
           {filteredServices.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredServices.map((service) => (
-                <div key={service.id} className="bg-card border border-border rounded-lg p-6 hover:border-primary transition-colors">
+              {filteredServices.map((service, idx) => (
+                <div key={service.id || `service-${idx}`} className="bg-card border border-border rounded-lg p-6 hover:border-primary transition-colors">
                   {/* Header */}
                   <div className="mb-4">
                     <div className="flex items-start justify-between mb-2">
