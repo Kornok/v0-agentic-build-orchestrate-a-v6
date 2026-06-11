@@ -12,55 +12,44 @@ async function trySave(table: string, row: Record<string, unknown>) {
   }
 }
 
-function getFallbackDocument(title: string, docType: 'essay' | 'email' | 'report' | 'article', topic: string): string {
+function getFallbackDocument(title: string, topic: string, docType: string): string {
   if (docType === 'essay') {
     return `# ${title}
 
 ## Introduction
-${topic} is a significant topic that warrants comprehensive analysis and discussion. This essay examines various aspects of ${topic}, providing insights into its importance, applications, and implications. Through thorough examination, we can better understand the complexities and nuances of this subject.
+${title} is an important topic that warrants careful examination. This essay explores the key aspects, significance, and implications of ${title} in relation to the following topic: ${topic}. Through careful analysis, we will develop a comprehensive understanding of how these elements interconnect and influence one another.
 
-## Main Points and Analysis
+## First Main Point
+${topic} represents one of the most significant aspects of ${title}. This dimension is crucial because it establishes the foundational understanding necessary for deeper exploration. The relationship between these concepts creates a framework for analyzing the broader implications and applications.
 
-### First Key Aspect
-One of the most important aspects of ${topic} is its foundational principles. These principles form the basis for understanding more complex concepts and applications. By grasping these fundamentals, we can build a solid understanding of the field.
+## Second Main Point
+Another critical dimension involves the practical implications of ${title} as it relates to ${topic}. This perspective allows us to understand how theoretical concepts translate into real-world applications. Organizations and professionals consistently demonstrate the importance of this connection through their practices and strategic decisions.
 
-### Second Key Aspect
-Another crucial element is the real-world application of ${topic}. In practice, ${topic} has demonstrated significant value across various industries and sectors. Organizations and professionals utilize these concepts to solve problems and create innovations.
-
-### Third Key Aspect
-The evolution of ${topic} over time shows how knowledge and practice continue to develop. As research advances and new technologies emerge, our understanding of ${topic} becomes more sophisticated and comprehensive.
-
-## Implications and Relevance
-The study of ${topic} has far-reaching implications for multiple disciplines. Understanding these concepts helps professionals make better decisions and develop more effective solutions to complex problems.
+## Third Main Point
+Furthermore, the long-term implications of ${title} continue to evolve. As ${topic} develops and changes, our understanding must adapt accordingly. This dynamic relationship ensures that ${title} remains relevant and applicable across different contexts and time periods.
 
 ## Conclusion
-In conclusion, ${topic} represents an essential field of study with significant practical and theoretical importance. Continued research and education in this area will contribute to personal and professional development, as well as societal progress and innovation.`
+In conclusion, ${title} represents a multifaceted topic with significant implications for ${topic}. By examining the key aspects discussed in this essay, we gain a more comprehensive understanding of their interconnected nature and importance. As we move forward, continued attention to ${title} will remain essential for informed decision-making and strategic planning.`
   } else if (docType === 'email') {
     return `Subject: ${title}
 
 Dear [Recipient],
 
-I am writing to you regarding ${topic}. This is an important matter that requires your attention and consideration.
+I hope this message finds you well. I am writing to discuss an important matter regarding ${title}.
 
-The key points I would like to discuss are as follows:
+${topic} is a subject that requires our immediate attention and collaborative effort. After careful consideration, I believe it is essential that we address this matter proactively to ensure optimal outcomes for all stakeholders involved.
 
-1. **Overview**: ${topic} has become increasingly relevant in our current context. Understanding its implications is essential for informed decision-making.
+Key Points:
+• The primary concern is to ensure ${title} is handled professionally and efficiently
+• ${topic} presents both challenges and opportunities that we should leverage
+• Implementation of best practices will strengthen our position
+• Timeline considerations are important for successful execution
 
-2. **Specific Points**: There are several specific aspects we should address:
-   - Implementation considerations
-   - Timeline and deadlines
-   - Resource requirements
-   - Expected outcomes
+I recommend that we schedule a meeting to discuss this further and develop an action plan. Your input and expertise would be invaluable in shaping our approach to ${title}.
 
-3. **Next Steps**: To move forward effectively, I propose the following actions:
-   - Schedule a meeting to discuss details
-   - Gather necessary information and resources
-   - Develop an action plan
-   - Establish key milestones
+Please let me know your availability for a discussion at your earliest convenience. I am happy to work around your schedule to ensure we address this matter promptly.
 
-4. **Request**: I would appreciate your prompt attention to this matter. Please let me know your availability for a meeting or discussion.
-
-Thank you for your time and consideration. I look forward to your response and working together on this important matter.
+Thank you for your attention to this important matter. I look forward to your response.
 
 Best regards,
 [Your Name]`
@@ -68,89 +57,76 @@ Best regards,
     return `# Report: ${title}
 
 ## Executive Summary
-This report provides an analysis of ${topic} and its relevance to our organization. The findings indicate important considerations that should inform strategic decisions and operational planning.
+This report provides a comprehensive analysis of ${title} with particular focus on ${topic}. The findings indicate that ${title} represents a significant consideration that requires strategic attention. Key recommendations are provided to address the identified opportunities and challenges.
 
-## Introduction
-${topic} is a critical area requiring careful analysis and strategic response. This report examines the current state of ${topic}, identifies key challenges and opportunities, and provides recommendations for moving forward.
+## Overview
+${title} is a multifaceted subject that intersects with various organizational and operational considerations. Understanding the nuances of ${topic} is essential for informed decision-making and strategic planning.
 
 ## Key Findings
+1. **Current Status**: ${topic} demonstrates both strengths and areas for improvement
+2. **Market Position**: ${title} is positioned within a competitive landscape
+3. **Stakeholder Impact**: Multiple stakeholders are affected by developments in ${topic}
+4. **Trend Analysis**: Current trends suggest the importance of ${title} will continue to grow
 
-### Finding 1
-${topic} demonstrates significant impact across multiple dimensions. Current trends suggest that this area will continue to grow in importance and relevance.
+## Detailed Analysis
+The analysis of ${topic} reveals several important patterns:
 
-### Finding 2
-There are several important stakeholders and factors to consider when addressing ${topic}. Coordination and collaboration are essential for successful outcomes.
-
-### Finding 3
-Resources and investments in ${topic} have shown measurable returns. Continued investment in this area is justified and recommended.
-
-## Analysis
-The analysis of ${topic} reveals both challenges and opportunities. By understanding the underlying factors and dynamics, we can develop more effective strategies and solutions.
-
-### Challenges
-- Resource constraints
-- Stakeholder alignment
-- Implementation complexity
-- Market dynamics
-
-### Opportunities
-- Growth potential
-- Innovation possibilities
-- Market expansion
-- Strategic partnerships
+- **Opportunity Areas**: There are clear opportunities to enhance ${title}
+- **Risk Factors**: Certain risks must be managed carefully
+- **Resource Requirements**: Appropriate resources will be needed for implementation
+- **Timeline Considerations**: Implementation should follow a structured timeline
 
 ## Recommendations
-Based on this analysis, we recommend the following actions:
+Based on this analysis, the following recommendations are proposed:
 
-1. **Short-term**: Implement immediate measures to address current challenges
-2. **Medium-term**: Develop comprehensive strategies for sustained growth
-3. **Long-term**: Invest in research and development for future innovation
+1. Develop a strategic plan focused on ${title}
+2. Allocate appropriate resources to ${topic}
+3. Establish clear metrics to measure progress
+4. Maintain regular communication with stakeholders
+5. Review and adjust strategies as needed
 
 ## Conclusion
-${topic} requires strategic attention and proactive management. By implementing these recommendations, we can position our organization for success and sustainable growth in this important area.
-
----
-Report prepared for strategic planning and decision-making purposes.`
-  } else {
-    // Article
+${title} represents an important priority that deserves continued attention. By implementing the recommendations outlined in this report, organizations can better position themselves to address ${topic} effectively and achieve desired outcomes.`
+  } else if (docType === 'article') {
     return `# ${title}
 
-## Introduction
-${topic} has become an increasingly important topic in today's world. Whether you're a professional, student, or simply someone looking to expand your knowledge, understanding ${topic} is valuable and relevant. In this article, we explore key aspects of ${topic} and provide practical insights.
-
-## Understanding the Basics
-Before diving into complex details, it's important to understand the fundamentals of ${topic}. At its core, ${topic} encompasses [key concept]. This foundation is essential for grasping more advanced ideas and applications.
-
-## Key Concepts and Ideas
-
-### Concept 1
-One important aspect of ${topic} is how it relates to [related field]. This connection helps us understand the broader implications and applications.
-
-### Concept 2
-Another crucial element is the practical application of ${topic}. Real-world examples show us how these concepts work in practice and create tangible value.
-
-### Concept 3
-The evolving nature of ${topic} means that professionals and learners must stay updated with latest developments and research findings.
-
-## Practical Tips and Insights
-
-1. **Get the fundamentals right**: Start with solid basics before moving to advanced topics
-2. **Learn from real examples**: Study case studies and real-world applications
-3. **Stay curious and ask questions**: Deep understanding comes from active engagement
-4. **Practice and apply**: Theory becomes meaningful through practical application
-5. **Connect with others**: Learn from communities and professionals in the field
+${title} is a topic that deserves serious consideration in today's world. Whether you're new to ${topic} or have been interested in this area for some time, understanding the key aspects can provide valuable insights and perspectives.
 
 ## Why This Matters
-${topic} matters for several important reasons. It affects how we work, solve problems, and innovate. Understanding ${topic} can lead to better decisions, more effective solutions, and greater success in both professional and personal contexts.
+
+${topic} plays an increasingly important role in our personal and professional lives. The implications of ${title} extend across multiple domains, affecting how we work, think, and interact. By exploring this topic in depth, we gain tools and frameworks to navigate an increasingly complex landscape.
+
+## Understanding the Basics
+
+At its core, ${title} involves ${topic}. This fundamental concept serves as the foundation for understanding more complex relationships and applications. Many people don't realize how ${title} influences their daily decisions and experiences.
+
+## Real-World Applications
+
+The practical applications of ${title} are extensive and diverse. In business, professionals leverage ${topic} to improve operations and drive innovation. In education, students use these concepts to enhance their critical thinking skills. In personal development, individuals apply ${title} principles to achieve their goals and improve their quality of life.
+
+## Key Insights
+
+Several important insights emerge when we examine ${title} more closely:
+
+1. **Holistic Understanding**: ${topic} requires considering multiple perspectives and dimensions
+2. **Practical Relevance**: The concepts behind ${title} have direct applications to real-world situations
+3. **Continuous Evolution**: ${topic} continues to develop as new research and experiences emerge
+4. **Personal Significance**: Understanding ${title} can lead to meaningful personal and professional growth
+
+## Looking Forward
+
+As ${topic} continues to evolve, ${title} will undoubtedly play an increasingly important role. By staying informed and engaged with this topic, you position yourself to take advantage of emerging opportunities and navigate future challenges effectively.
 
 ## Conclusion
-${topic} is a fascinating and important area of study and practice. By developing a solid understanding of the concepts, staying current with developments, and applying knowledge practically, you can leverage ${topic} for personal and professional growth. Whether you're just starting your journey or looking to deepen your expertise, now is an excellent time to engage with ${topic}.
 
-Keep learning, stay curious, and embrace the opportunities that ${topic} presents!`
+${title} represents far more than just an academic subject—it's a practical framework for understanding and engaging with the modern world. By deepening your knowledge of ${topic}, you equip yourself with valuable insights and tools. Whether your interest is personal or professional, investing time in understanding ${title} is time well spent.
+
+What are your thoughts on ${title}? We'd love to hear from you and continue this important conversation.`
   }
+  return ''
 }
 
-async function generateWithAI(prompt: string, systemPrompt: string, docType?: 'essay' | 'email' | 'report' | 'article'): Promise<string> {
+async function generateWithAI(prompt: string, systemPrompt: string): Promise<string> {
   try {
     const response = await generateText({
       model: 'groq/mixtral-8x7b-32768',
@@ -161,13 +137,8 @@ async function generateWithAI(prompt: string, systemPrompt: string, docType?: 'e
     })
     return response.text
   } catch (error) {
-    console.error('[v0] AI generation error:', error)
-    // Fallback if API fails
-    const titleMatch = prompt.match(/titled "([^"]+)"/)
-    const title = titleMatch ? titleMatch[1] : 'Untitled'
-    const topicMatch = prompt.match(/about:?\s*\n\n(.+?)$/ms)
-    const topic = topicMatch ? topicMatch[1].split('\n')[0] : 'your topic'
-    return getFallbackDocument(title, docType || 'essay', topic)
+    console.log('[v0] AI generation failed, using fallback')
+    return ''
   }
 }
 
@@ -182,6 +153,8 @@ export async function POST(request: Request) {
     if (!topic || topic.trim().length === 0) {
       return Response.json({ error: 'No topic provided' }, { status: 400 })
     }
+
+    let content = ''
 
     let prompt = ''
     let systemPrompt = 'You are a skilled professional writer. Produce well-structured, polished documents that are informative and engaging.'
@@ -256,7 +229,14 @@ Requirements:
         prompt = `Write content titled "${title}" about: ${topic}`
     }
 
-    const content = await generateWithAI(prompt, systemPrompt, docType as any)
+    if (prompt) {
+      content = await generateWithAI(prompt, systemPrompt)
+    }
+
+    // Use fallback if AI generation failed
+    if (!content || content.trim().length === 0) {
+      content = getFallbackDocument(title, topic, docType)
+    }
 
     const saved = await trySave('written_documents', {
       title,

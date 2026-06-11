@@ -48,93 +48,129 @@ ${topic} operates on several key principles:
 
 ## Why Is It Important?
 - **Practical Value**: Essential skills for modern professionals
-- **Problem-Solving**: Provides tools for addressing complex challenges
-- **Career Development**: Opens doors to numerous career opportunities
-- **Personal Growth**: Enhances critical thinking and analytical abilities
+- **Career Development**: Opens opportunities in various fields
+- **Problem Solving**: Provides tools to tackle real-world challenges
+- **Innovation**: Drives advancement and new discoveries
 
 ## Real-World Applications
-${topic} is applied in:
-- Technology and innovation
-- Business and entrepreneurship
-- Science and research
-- Education and training
-- Healthcare and wellness
-
-## Related Concepts
-Understanding ${topic} requires familiarity with:
-- Foundational principles and theories
-- Industry standards and best practices
-- Emerging trends and developments
-- Integration with complementary subjects
+- Application 1: ${topic} in industry
+- Application 2: ${topic} in research
+- Application 3: ${topic} in everyday contexts
 
 ## Key Takeaways
-1. Master the core concepts first
-2. Practice application in real scenarios
-3. Stay updated with new developments
-4. Integrate knowledge across disciplines
-5. Develop problem-solving skills`
-  } else {
+Understanding ${topic} requires combining theoretical knowledge with practical experience. Focus on core concepts, practice consistently, and connect learning to real-world scenarios.`
+  } else if (studyType === 'quiz') {
     return `# Practice Quiz: ${topic}
 
-Question 1: What is the primary definition of ${topic}?
-A) A basic introduction to the subject
-B) A comprehensive study of related concepts
-C) An advanced specialized field
-D) A historical perspective only
+Question 1: Which of the following best describes ${topic}?
+A) A complex theoretical concept with limited applications
+B) A fundamental principle with broad applications across multiple fields
+C) A recent discovery with uncertain validity
+D) An outdated idea no longer relevant to modern practice
 Answer: B
 
-Question 2: Which of the following is a key principle of ${topic}?
-A) Simplicity over complexity
-B) Theory without practice
-C) Combination of theory and application
-D) Practice without understanding
+Question 2: What is a key principle when studying ${topic}?
+A) Memorization without understanding
+B) Focusing only on theory
+C) Combining theory with practical application
+D) Avoiding real-world examples
 Answer: C
 
-Question 3: In what field is ${topic} most commonly applied?
-A) Only in academia
-B) Multiple industries and sectors
-C) Exclusively in technology
-D) Limited to research only
+Question 3: How does ${topic} relate to professional development?
+A) It has no practical value
+B) It is essential for career advancement
+C) It is only for academic purposes
+D) It is rarely used in practice
 Answer: B
 
-Question 4: What is an important skill when studying ${topic}?
-A) Memorization only
-B) Understanding concepts and principles
-C) Ignoring practical applications
-D) Focusing only on theory
+Question 4: What is the foundation of understanding ${topic}?
+A) Memorizing dates and facts
+B) Grasping core concepts and principles
+C) Only reading textbooks
+D) Ignoring historical context
 Answer: B
 
-Question 5: How does ${topic} relate to real-world scenarios?
-A) No practical relevance
-B) Limited applications
-C) Significant practical applications
-D) Only theoretical importance
+Question 5: Which statement about ${topic} is accurate?
+A) It never changes or evolves
+B) It is completely theoretical with no applications
+C) It continues to develop as research advances
+D) It is equally important for all professions
 Answer: C
 
-Question 6: What should be the first step in learning ${topic}?
-A) Advanced topics
-B) Master the basics
-C) Real-world applications
-D) Specialized techniques
+Question 6: What role does ${topic} play in problem-solving?
+A) No role whatsoever
+B) Provides frameworks and tools for analysis
+C) Only used in academic settings
+D) Prevents creative thinking
 Answer: B
 
-Question 7: Which component is essential for success in ${topic}?
-A) Theory alone
-B) Practice alone
-C) Both theory and practice
-D) Neither theory nor practice
+Question 7: How can ${topic} be best learned?
+A) Through passive reading only
+B) Through active learning and practice
+C) By memorizing definitions
+D) It cannot be learned effectively
+Answer: B
+
+Question 8: What is a common application of ${topic}?
+A) It has no real applications
+B) It is only theoretical
+C) Solving problems in professional settings
+D) Entertainment purposes only
 Answer: C
 
-Question 8: How often should one review ${topic} materials?
-A) Once and never again
-B) Occasionally
-C) Regularly for mastery
-D) Only before exams
-Answer: C`
+Question 9: Why is ${topic} important for career growth?
+A) It has no career implications
+B) It provides competitive advantages
+C) It limits career options
+D) It is irrelevant to employment
+Answer: B
+
+Question 10: What should be emphasized when teaching ${topic}?
+A) Rote memorization
+B) Understanding and application
+C) Avoiding practical examples
+D) Focusing only on history
+Answer: B
+
+Question 11: How does ${topic} integrate with other concepts?
+A) It is completely isolated
+B) It works independently
+C) It connects with related disciplines
+D) It contradicts other areas
+Answer: C
+
+Question 12: What is the best approach to mastering ${topic}?
+A) Quick cramming before exams
+B) Consistent practice and review
+C) Avoiding difficult concepts
+D) Reading once and moving on
+Answer: B
+
+Question 13: Why do professionals need knowledge of ${topic}?
+A) They do not
+B) It makes work more complicated
+C) It is essential for effective decision-making
+D) It is optional
+Answer: C
+
+Question 14: How has ${topic} evolved over time?
+A) It has remained static
+B) It has developed with technological and research advances
+C) It has become less relevant
+D) It disappeared from practice
+Answer: B
+
+Question 15: What defines success in learning ${topic}?
+A) Memorizing all facts
+B) Understanding concepts and applying them effectively
+C) Passing without learning
+D) Avoiding challenges
+Answer: B`
   }
+  return ''
 }
 
-async function generateWithAI(prompt: string, systemPrompt: string, studyType?: 'notes' | 'explanation' | 'quiz'): Promise<string> {
+async function generateWithAI(prompt: string, systemPrompt: string): Promise<string> {
   try {
     const response = await generateText({
       model: 'groq/mixtral-8x7b-32768',
@@ -145,11 +181,8 @@ async function generateWithAI(prompt: string, systemPrompt: string, studyType?: 
     })
     return response.text
   } catch (error) {
-    console.error('[v0] AI generation error:', error)
-    // Fallback if API fails
-    const topicMatch = prompt.match(/about "([^"]+)"/)
-    const topic = topicMatch ? topicMatch[1] : 'your topic'
-    return getFallbackStudyMaterial(topic, studyType || 'notes')
+    console.log('[v0] AI generation failed, using fallback')
+    return ''
   }
 }
 
@@ -160,6 +193,8 @@ export async function POST(request: Request) {
     if (!topic || topic.trim().length === 0) {
       return Response.json({ error: 'No topic provided' }, { status: 400 })
     }
+
+    let studyMaterial = ''
 
     let prompt = ''
     let systemPrompt = 'You are an expert tutor who creates clear, well-organized study material for students.'
@@ -207,11 +242,16 @@ D) Option 4
 Answer: [Correct option]
 
 [Continue for all questions]`
-    } else {
-      prompt = `Create comprehensive study material about "${topic}"`
     }
 
-    const studyMaterial = await generateWithAI(prompt, systemPrompt, studyType)
+    if (prompt) {
+      studyMaterial = await generateWithAI(prompt, systemPrompt)
+    }
+
+    // Use fallback if AI generation failed
+    if (!studyMaterial || studyMaterial.trim().length === 0) {
+      studyMaterial = getFallbackStudyMaterial(topic, studyType as 'notes' | 'explanation' | 'quiz')
+    }
 
     const saved = await trySave('study_sessions', {
       topic,
