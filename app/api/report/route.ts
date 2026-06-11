@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
 import { generateText } from 'ai'
-import { openai } from '@ai-sdk/openai'
 
 const REPORT_TYPES = {
   summary: 'Executive Summary',
@@ -31,10 +30,10 @@ Please format the report professionally with sections, bullet points, and clear 
 
     // Generate report using AI SDK
     const { text: generatedReport } = await generateText({
-      model: openai('gpt-4-turbo'),
+      model: 'openai/gpt-5-mini',
       prompt,
       temperature: 0.7,
-      maxTokens: 2000,
+      maxOutputTokens: 2000,
     })
 
     // Save to database
