@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { generateText } from 'ai'
+import { openai } from '@ai-sdk/openai'
 
 export async function POST(request: Request) {
   try {
@@ -51,10 +52,10 @@ Answer: [Correct option]
     }
 
     const { text: studyMaterial } = await generateText({
-      model: 'openai/gpt-5-mini',
+      model: openai('gpt-4-turbo'),
       prompt,
       temperature: 0.7,
-      maxOutputTokens: 2000,
+      maxTokens: 2000,
     })
 
     // Save to database

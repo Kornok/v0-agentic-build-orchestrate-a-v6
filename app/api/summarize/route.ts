@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { generateText } from 'ai'
+import { openai } from '@ai-sdk/openai'
 
 export async function POST(request: Request) {
   try {
@@ -29,10 +30,10 @@ Please provide a clear, concise summary that captures the main points.`
 
     // Generate summary using AI SDK
     const { text: summary } = await generateText({
-      model: 'openai/gpt-5-mini',
+      model: openai('gpt-4-turbo'),
       prompt,
       temperature: 0.7,
-      maxOutputTokens: 500,
+      maxTokens: 500,
     })
 
     // Save to database
