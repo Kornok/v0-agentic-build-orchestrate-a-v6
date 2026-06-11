@@ -6,6 +6,14 @@ export async function updateSession(request: NextRequest) {
     request,
   })
 
+  // If Supabase isn't configured, skip session handling so the app still works.
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  ) {
+    return supabaseResponse
+  }
+
   // With Fluid compute, don't put this client in a global environment
   // variable. Always create a new one on each request.
   const supabase = createServerClient(

@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Mic, Loader, Copy } from 'lucide-react'
 
 interface Command {
@@ -17,6 +18,7 @@ export default function VoiceAssistantPage() {
   const [error, setError] = useState('')
   const [copied, setCopied] = useState<string | null>(null)
   const recognitionRef = useRef<any>(null)
+  const router = useRouter()
 
   useEffect(() => {
     // Initialize Web Speech API
@@ -35,11 +37,13 @@ export default function VoiceAssistantPage() {
 
       recognitionRef.current.onresult = (event: any) => {
         let transcript = ''
+        let isFinal = false
         for (let i = event.resultIndex; i < event.results.length; i++) {
           transcript += event.results[i][0].transcript
+          if (event.results[i].isFinal) isFinal = true
         }
 
-        if (event.isFinal) {
+        if (isFinal) {
           handleCommand(transcript)
         }
       }
@@ -66,28 +70,37 @@ export default function VoiceAssistantPage() {
   const handleCommand = async (transcript: string) => {
     const command = transcript.toLowerCase().trim()
     let response = ''
+    let navigateTo = ''
 
-    // Simple command handling
-    if (command.includes('hello') || command.includes('hi')) {
+    // Navigation commands - actually route the user
+    const routes: { keywords: string[]; href: string; label: string }[] = [
+      { keywords: ['scheduler', 'schedule'], href: '/dashboard/scheduler', label: 'Schedule Manager' },
+      { keywords: ['translator', 'translate'], href: '/dashboard/translator', label: 'Translator' },
+      { keywords: ['summarizer', 'summarize'], href: '/dashboard/summarizer', label: 'Summarizer' },
+      { keywords: ['report'], href: '/dashboard/reports', label: 'Reports Generator' },
+      { keywords: ['studying', 'study'], href: '/dashboard/studying', label: 'Studying Assistant' },
+      { keywords: ['writer', 'write'], href: '/dashboard/writer', label: 'Document Writer' },
+      { keywords: ['emergency'], href: '/dashboard/emergency', label: 'Emergency Info' },
+      { keywords: ['services', 'service'], href: '/dashboard/services', label: 'Local Service Finder' },
+      { keywords: ['dashboard', 'home'], href: '/dashboard', label: 'Dashboard' },
+    ]
+
+    const matchedRoute =
+      command.includes('go to') || command.includes('open') || command.includes('navigate')
+        ? routes.find((r) => r.keywords.some((k) => command.includes(k)))
+        : undefined
+
+    if (command.includes('hello') || command.includes('hi ') || command === 'hi') {
       response = 'Hello! I am your NEXUS AI voice assistant. How can I help you today?'
     } else if (command.includes('time')) {
       response = `It is currently ${new Date().toLocaleTimeString()}`
     } else if (command.includes('date')) {
       response = `Today is ${new Date().toLocaleDateString()}`
-    } else if (command.includes('schedule')) {
-      response = 'You can create schedules in the Schedule Manager. Say go to scheduler to navigate there.'
-    } else if (command.includes('translate')) {
-      response = 'You can translate text in the Translator tool. Say go to translator.'
-    } else if (command.includes('summarize')) {
-      response = 'You can summarize documents in the Summarizer tool. Say go to summarizer.'
-    } else if (command.includes('report')) {
-      response = 'You can generate reports in the Reports Generator. Say go to reports.'
-    } else if (command.includes('emergency')) {
-      response = 'You can access emergency information in the Emergency Info section.'
-    } else if (command.includes('services')) {
-      response = 'You can find local services using the Local Service Finder tool.'
+    } else if (matchedRoute) {
+      response = `Opening ${matchedRoute.label}.`
+      navigateTo = matchedRoute.href
     } else {
-      response = `I heard: "${transcript}". I can help you with scheduling, translating, summarizing, reports, and more. What would you like to do?`
+      response = `I heard: "${transcript}". I can help you with scheduling, translating, summarizing, reports, and more. Try saying "go to scheduler".`
     }
 
     // Add to commands history
@@ -98,10 +111,15 @@ export default function VoiceAssistantPage() {
       timestamp: new Date(),
     }
 
-    setCommands([newCommand, ...commands])
+    setCommands((prev) => [newCommand, ...prev])
 
     // Speak the response
     speakResponse(response)
+
+    // Navigate after a short delay so the response is visible/spoken
+    if (navigateTo) {
+      setTimeout(() => router.push(navigateTo), 1200)
+    }
   }
 
   const speakResponse = (text: string) => {
