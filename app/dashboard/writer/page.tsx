@@ -19,13 +19,10 @@ export default function WriterPage() {
   const [documents, setDocuments] = useState<WrittenDocument[]>([])
   const [error, setError] = useState('')
   const [copied, setCopied] = useState<string | null>(null)
-  const [streamingContent, setStreamingContent] = useState('')
-  const [isStreaming, setIsStreaming] = useState(false)
 
   const handleWrite = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    setStreamingContent('')
 
     if (!title.trim() || !topic.trim()) {
       setError('Please enter title and topic')
@@ -33,9 +30,8 @@ export default function WriterPage() {
     }
 
     setLoading(true)
-    setIsStreaming(true)
     try {
-      const response = await fetch('/api/writer/stream', {
+      const response = await fetch('/api/writer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, docType, topic }),
@@ -45,18 +41,8 @@ export default function WriterPage() {
 
       if (!response.ok) {
         setError(data.error || 'Failed to generate document')
-        setIsStreaming(false)
         setLoading(false)
         return
-      }
-
-      // Simulate streaming effect
-      const content = data.content || ''
-      let displayed = ''
-      for (let i = 0; i < content.length; i += 3) {
-        displayed = content.slice(0, i)
-        setStreamingContent(displayed)
-        await new Promise(resolve => setTimeout(resolve, 10))
       }
 
       setDocuments([
@@ -73,12 +59,10 @@ export default function WriterPage() {
       setTitle('')
       setTopic('')
       setDocType('essay')
-      setStreamingContent('')
     } catch (err) {
       setError('Error: ' + (err instanceof Error ? err.message : 'Unknown error'))
     } finally {
       setLoading(false)
-      setIsStreaming(false)
     }
   }
 
@@ -170,17 +154,6 @@ export default function WriterPage() {
             )}
           </form>
         </div>
-
-        {/* Streaming Content Preview */}
-        {isStreaming && streamingContent && (
-          <div className="bg-card border border-primary/20 rounded-lg p-6 mb-8 animate-pulse">
-            <h2 className="text-xl font-light text-foreground mb-4">Writing Document...</h2>
-            <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
-              {streamingContent}
-              <span className="animate-blink">|</span>
-            </p>
-          </div>
-        )}
 
         {/* Written Documents */}
         {documents.length > 0 && (

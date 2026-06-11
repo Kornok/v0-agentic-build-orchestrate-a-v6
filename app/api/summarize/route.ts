@@ -43,11 +43,9 @@ Provide a clear, concise summary that captures the main points. Output only the 
         prompt,
         system: 'You are an expert summarizer. Respond only with the summary text.',
         temperature: 0.5,
-        retries: 2,
       })
-    } catch (err) {
+    } catch {
       // Fallback: local extractive summarization so the feature always works.
-      console.error('AI summarization failed, using local fallback:', err)
       summary = extractiveSummary(
         text,
         sentenceCounts[summaryLength as keyof typeof sentenceCounts] || 5

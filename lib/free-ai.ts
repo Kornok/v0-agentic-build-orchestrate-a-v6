@@ -17,8 +17,6 @@ interface GenerateOptions {
   temperature?: number
   /** Number of upstream attempts before falling back. */
   retries?: number
-  /** If provided, stream response chunks to this callback. */
-  onChunk?: (chunk: string) => void
 }
 
 /**
@@ -30,7 +28,6 @@ export async function generateFreeText({
   system,
   temperature = 0.7,
   retries = 3,
-  onChunk,
 }: GenerateOptions): Promise<string> {
   const messages = [
     ...(system ? [{ role: 'system', content: system }] : []),
@@ -67,19 +64,7 @@ export async function generateFreeText({
       }
 
       const text = body.trim()
-      if (text.length > 0) {
-        // Call onChunk for real-time streaming if provided
-        if (onChunk) {
-          // Simulate streaming by splitting into sentences
-          const sentences = text.match(/[^.!?]+[.!?]+/g) || [text]
-          for (const sentence of sentences) {
-            onChunk(sentence.trim() + ' ')
-            // Small delay for realistic streaming feel
-            await sleep(50)
-          }
-        }
-        return text
-      }
+      if (text.length > 0) return text
 
       lastError = new Error('Empty response from Pollinations')
     } catch (err) {
@@ -171,51 +156,4 @@ export function extractiveSummary(text: string, maxSentences = 3): string {
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
-}
-
-/**
- * Create a generic fallback response when API fails.
- * Used for all AI features when the generative API is unavailable.
- */
-export function createFallbackResponse(
-  type: 'study' | 'essay' | 'explanation' | 'summary' | 'translation',
-  input: string,
-  context?: string
-): string {
-  const maxLength = Math.min(input.length * 2, 500)
-  
-  switch (type) {
-    case 'study':
-      return `Study Notes on ${context || 'the given topic'}:\n\n` +
-        `Key Points:\n` +
-        `• ${input.split(/[.!?]/)[0]?.trim() || 'Topic overview'}\n` +
-        `• Related concepts and applications\n` +
-        `• Practical examples and use cases\n\n` +
-        `Remember to review these points regularly for better retention.`
-    
-    case 'essay':
-      return `# ${context || 'Essay'}\n\n` +
-        `## Introduction\n${input.substring(0, Math.min(input.length, 100))}\n\n` +
-        `## Main Points\n` +
-        `• First main argument\n` +
-        `• Second main argument\n` +
-        `• Supporting evidence\n\n` +
-        `## Conclusion\nBased on the above points, the topic demonstrates important considerations.`
-    
-    case 'explanation':
-      return `## Detailed Explanation\n\n` +
-        `**Overview**: ${input.substring(0, 150)}\n\n` +
-        `**How it works**: This involves multiple steps and considerations.\n\n` +
-        `**Why it matters**: Understanding this concept is valuable for practical applications.\n\n` +
-        `**Related ideas**: Connected concepts expand the understanding of this topic.`
-    
-    case 'summary':
-      return extractiveSummary(input, 3)
-    
-    case 'translation':
-      return `[Note: Direct translation not available. Content transliteration:\n${input}]`
-    
-    default:
-      return input
-  }
 }

@@ -1,57 +1,76 @@
-import { findNearbyServices, getLocationFromIP, getWeatherByLocation } from '@/lib/real-api-services'
+import {
+  findNearbyServices,
+  getLocationFromIP,
+  getWeatherByLocation,
+  reverseGeocode,
+  type ServiceType,
+} from '@/lib/real-api-services'
 import { getRealServicesByCoordinates } from '@/lib/real-services-data'
+
+export const dynamic = 'force-dynamic'
+
+const VALID_TYPES: ServiceType[] = [
+  'hospital',
+  'police',
+  'pharmacy',
+  'restaurant',
+  'cafe',
+  'gas_station',
+  'bank',
+  'hotel',
+]
 
 export async function POST(request: Request) {
   try {
-    const { lat, lng, serviceType, radius = 5000 } = await request.json()
+    const body = await request.json().catch(() => ({}))
+    const { lat, lng, serviceType, radius = 5000 } = body
 
-    // If no coordinates provided, try to get from IP or use defaults
-    let latitude = lat
-    let longitude = lng
+    // Resolve coordinates: use provided values, fall back to IP, then NYC.
+    let latitude = typeof lat === 'number' ? lat : undefined
+    let longitude = typeof lng === 'number' ? lng : undefined
+    let locationSource: 'device' | 'ip' | 'default' = 'device'
 
-    if (!latitude || !longitude) {
-      const location = await getLocationFromIP()
-      if (location) {
-        latitude = location.lat
-        longitude = location.lng
+    if (latitude === undefined || longitude === undefined) {
+      const ipLocation = await getLocationFromIP()
+      if (ipLocation) {
+        latitude = ipLocation.lat
+        longitude = ipLocation.lng
+        locationSource = 'ip'
       } else {
-        // Default to New York City if location cannot be determined
         latitude = 40.7128
-        longitude = -74.0060
+        longitude = -74.006
+        locationSource = 'default'
       }
     }
 
-    // Try to get real services: First from Overpass, then from our real database
-    let services = []
-    
-    try {
-      // Try Overpass API first (real-time OpenStreetMap data)
-      services = await Promise.race([
-        findNearbyServices(
-          latitude,
-          longitude,
-          serviceType as 'hospital' | 'police' | 'pharmacy' | 'restaurant' | 'cafe',
-          radius
-        ),
-        new Promise(resolve => setTimeout(() => resolve([]), 4000)) // 4 second timeout
-      ])
-    } catch (err) {
-      console.error('Overpass API error:', err)
-    }
+    const requestedType: ServiceType = VALID_TYPES.includes(serviceType)
+      ? serviceType
+      : 'restaurant'
 
-    // If Overpass didn't return data, use our real services database
+    // Fetch live OpenStreetMap data, reverse-geocoded place name, and weather in parallel.
+    const [overpassServices, place, weather] = await Promise.all([
+      findNearbyServices(latitude, longitude, requestedType, radius).catch(() => []),
+      reverseGeocode(latitude, longitude).catch(() => null),
+      getWeatherByLocation(latitude, longitude).catch(() => null),
+    ])
+
+    let services = overpassServices
+    let dataSource: 'overpass' | 'database' = 'overpass'
+
+    // Fall back to the curated database only if the live query returned nothing.
     if (!services || services.length === 0) {
-      services = getRealServicesByCoordinates(latitude, longitude, serviceType)
+      services = getRealServicesByCoordinates(latitude, longitude, requestedType)
+      dataSource = 'database'
     }
-
-    // Also get weather data
-    const weather = await getWeatherByLocation(latitude, longitude).catch(() => null)
 
     return Response.json({
       id: crypto.randomUUID(),
       location: { lat: latitude, lng: longitude },
-      serviceType,
+      locationSource,
+      place: place?.label ?? null,
+      serviceType: requestedType,
       services,
+      dataSource,
       weather,
       timestamp: new Date().toISOString(),
     })
@@ -59,37 +78,4 @@ export async function POST(request: Request) {
     console.error('Nearby services error:', error)
     return Response.json({ error: 'Failed to find nearby services' }, { status: 500 })
   }
-}
-
-// Fallback services if Overpass is unavailable
-function getDefaultServices(type: string) {
-  const defaults: Record<string, any[]> = {
-    hospital: [
-      { name: 'Central Medical Hospital', distance: '~2km', address: 'Main Street' },
-      { name: 'City Health Center', distance: '~3km', address: 'Oak Avenue' },
-      { name: 'Emergency Care Clinic', distance: '~1.5km', address: 'Park Road' },
-    ],
-    police: [
-      { name: 'Main Police Station', distance: '~2.5km', address: 'Government Street' },
-      { name: 'District Police Office', distance: '~4km', address: 'Downtown' },
-      { name: 'Community Police Center', distance: '~1km', address: 'Local Area' },
-    ],
-    pharmacy: [
-      { name: 'City Pharmacy', distance: '~0.5km', address: 'Main Street' },
-      { name: 'Health Mart Pharmacy', distance: '~1.2km', address: 'Shopping Center' },
-      { name: 'Quick Care Pharmacy', distance: '~2km', address: 'Town Center' },
-    ],
-    restaurant: [
-      { name: 'Local Restaurant', distance: '~0.8km', address: 'Dining District' },
-      { name: 'Main Street Bistro', distance: '~1.5km', address: 'Main Street' },
-      { name: 'City Center Eatery', distance: '~2.2km', address: 'Downtown' },
-    ],
-    cafe: [
-      { name: 'Morning Brew Cafe', distance: '~0.3km', address: 'Coffee Street' },
-      { name: 'Cozy Corner Cafe', distance: '~0.8km', address: 'Plaza Area' },
-      { name: 'Downtown Coffee House', distance: '~1.5km', address: 'Downtown' },
-    ],
-  }
-
-  return defaults[type] || defaults.restaurant
 }

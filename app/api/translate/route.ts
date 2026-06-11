@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { translateFree, createFallbackResponse } from '@/lib/free-ai'
+import { translateFree } from '@/lib/free-ai'
 
 // Free, keyless translation via MyMemory. No API key required.
 const SUPPORTED_LANGUAGES = {
@@ -47,13 +47,7 @@ export async function POST(request: Request) {
       return Response.json({ translatedText: text, id: crypto.randomUUID(), createdAt: new Date().toISOString() })
     }
 
-    let translation: string
-    try {
-      translation = await translateFree(text, sourceLanguage, targetLanguage)
-    } catch (err) {
-      console.error('Translation service failed, using fallback:', err)
-      translation = createFallbackResponse('translation', text)
-    }
+    const translation = await translateFree(text, sourceLanguage, targetLanguage)
 
     const saved = await trySave('translations', {
       original_text: text,

@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { generateFreeText, createFallbackResponse } from '@/lib/free-ai'
+import { generateFreeText } from '@/lib/free-ai'
 
 async function trySave(table: string, row: Record<string, unknown>) {
   try {
@@ -56,17 +56,11 @@ Requirements:
 
 Write the complete document:`
 
-    let content: string
-    try {
-      content = await generateFreeText({
-        prompt,
-        system: 'You are a skilled professional writer. Produce well-structured, polished documents.',
-        temperature: 0.7,
-      })
-    } catch (err) {
-      console.error('AI generation failed, using fallback:', err)
-      content = createFallbackResponse('essay', topic, title)
-    }
+    const content = await generateFreeText({
+      prompt,
+      system: 'You are a skilled professional writer. Produce well-structured, polished documents.',
+      temperature: 0.7,
+    })
 
     const saved = await trySave('written_documents', {
       title,

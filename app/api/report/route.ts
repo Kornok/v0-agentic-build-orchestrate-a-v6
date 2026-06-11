@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { generateFreeText, createFallbackResponse } from '@/lib/free-ai'
+import { generateFreeText } from '@/lib/free-ai'
 
 const REPORT_TYPES = {
   summary: 'Executive Summary',
@@ -35,17 +35,11 @@ Content: ${content}
 
 Please format the report professionally with sections, bullet points, and clear formatting. Use markdown formatting.`
 
-    let generatedReport: string
-    try {
-      generatedReport = await generateFreeText({
-        prompt,
-        system: 'You are a professional analyst who writes clear, well-formatted reports in markdown.',
-        temperature: 0.6,
-      })
-    } catch (err) {
-      console.error('AI generation failed, using fallback:', err)
-      generatedReport = createFallbackResponse('summary', content, title)
-    }
+    const generatedReport = await generateFreeText({
+      prompt,
+      system: 'You are a professional analyst who writes clear, well-formatted reports in markdown.',
+      temperature: 0.6,
+    })
 
     const saved = await trySave('reports', {
       title,

@@ -18,13 +18,10 @@ export default function StudyingPage() {
   const [sessions, setSessions] = useState<StudySession[]>([])
   const [error, setError] = useState('')
   const [copied, setCopied] = useState<string | null>(null)
-  const [streamingContent, setStreamingContent] = useState('')
-  const [isStreaming, setIsStreaming] = useState(false)
 
   const handleStudy = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    setStreamingContent('')
 
     if (!topic.trim()) {
       setError('Please enter a topic to study')
@@ -32,9 +29,8 @@ export default function StudyingPage() {
     }
 
     setLoading(true)
-    setIsStreaming(true)
     try {
-      const response = await fetch('/api/studying/stream', {
+      const response = await fetch('/api/studying', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ topic, studyType }),
@@ -44,18 +40,8 @@ export default function StudyingPage() {
 
       if (!response.ok) {
         setError(data.error || 'Failed to generate study material')
-        setIsStreaming(false)
         setLoading(false)
         return
-      }
-
-      // Simulate streaming effect for better UX
-      const content = data.notes || data.explanation || ''
-      let displayed = ''
-      for (let i = 0; i < content.length; i += 3) {
-        displayed = content.slice(0, i)
-        setStreamingContent(displayed)
-        await new Promise(resolve => setTimeout(resolve, 10))
       }
 
       setSessions([
@@ -71,12 +57,10 @@ export default function StudyingPage() {
 
       setTopic('')
       setStudyType('notes')
-      setStreamingContent('')
     } catch (err) {
       setError('Error: ' + (err instanceof Error ? err.message : 'Unknown error'))
     } finally {
       setLoading(false)
-      setIsStreaming(false)
     }
   }
 
@@ -155,17 +139,6 @@ export default function StudyingPage() {
             )}
           </form>
         </div>
-
-        {/* Streaming Content Preview */}
-        {isStreaming && streamingContent && (
-          <div className="bg-card border border-primary/20 rounded-lg p-6 mb-8 animate-pulse">
-            <h2 className="text-xl font-light text-foreground mb-4">Generating Study Material...</h2>
-            <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-              {streamingContent}
-              <span className="animate-blink">|</span>
-            </p>
-          </div>
-        )}
 
         {/* Study Sessions */}
         {sessions.length > 0 && (

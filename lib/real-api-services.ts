@@ -63,31 +63,72 @@ export async function translateWithMyMemory(
   }
 }
 
+export type ServiceType =
+  | 'hospital'
+  | 'police'
+  | 'pharmacy'
+  | 'restaurant'
+  | 'cafe'
+  | 'gas_station'
+  | 'bank'
+  | 'hotel'
+
+export interface NearbyService {
+  name: string
+  distance: string
+  distanceKm: number
+  address?: string
+  phone?: string
+  website?: string
+  lat: number
+  lng: number
+  serviceType: ServiceType
+}
+
+// Maps our service types to the OpenStreetMap tag filters that find them.
+const OSM_TAG_MAP: Record<ServiceType, Array<{ key: string; value: string }>> = {
+  hospital: [{ key: 'amenity', value: 'hospital' }],
+  police: [{ key: 'amenity', value: 'police' }],
+  pharmacy: [{ key: 'amenity', value: 'pharmacy' }],
+  restaurant: [{ key: 'amenity', value: 'restaurant' }],
+  cafe: [{ key: 'amenity', value: 'cafe' }],
+  gas_station: [{ key: 'amenity', value: 'fuel' }],
+  bank: [{ key: 'amenity', value: 'bank' }],
+  hotel: [{ key: 'tourism', value: 'hotel' }],
+}
+
 // Overpass API - Real location data from OpenStreetMap
 export async function findNearbyServices(
   lat: number,
   lng: number,
-  serviceType: 'hospital' | 'police' | 'pharmacy' | 'restaurant' | 'cafe',
+  serviceType: ServiceType,
   radius: number = 5000
-): Promise<Array<{ name: string; distance: string; address?: string }>> {
-  const amenityMap = {
-    hospital: 'hospital',
-    police: 'police',
-    pharmacy: 'pharmacy',
-    restaurant: 'restaurant',
-    cafe: 'cafe',
-  }
+): Promise<NearbyService[]> {
+  const tags = OSM_TAG_MAP[serviceType] || OSM_TAG_MAP.restaurant
 
-  const amenity = amenityMap[serviceType]
-  
-  // Build a simpler Overpass query
-  const query = `[out:json];(node["amenity"="${amenity}"](around:${radius},${lat},${lng});way["amenity"="${amenity}"](around:${radius},${lat},${lng}););out center;`
+  // Build an Overpass query covering nodes, ways, and relations for each tag.
+  const filters = tags
+    .map(
+      ({ key, value }) =>
+        `node["${key}"="${value}"](around:${radius},${lat},${lng});way["${key}"="${value}"](around:${radius},${lat},${lng});`
+    )
+    .join('')
+  const query = `[out:json][timeout:25];(${filters});out center;`
 
   try {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 8000)
+
     const response = await fetch('https://overpass-api.de/api/interpreter', {
       method: 'POST',
-      body: query,
+      body: `data=${encodeURIComponent(query)}`,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'User-Agent': 'NEXUS-AI-Service-Finder',
+      },
+      signal: controller.signal,
     })
+    clearTimeout(timeout)
 
     if (!response.ok) {
       throw new Error(`Overpass API returned ${response.status}`)
@@ -100,33 +141,43 @@ export async function findNearbyServices(
     }
 
     // Calculate distances and return services
-    const services = data.elements
+    const services: NearbyService[] = data.elements
       .filter((el: any) => el.tags?.name)
       .map((el: any) => {
-        const elementLat = el.lat || el.center?.lat
-        const elementLng = el.lon || el.center?.lon
-        
-        // Calculate distance using Haversine formula
-        let distance = '~0.5km'
-        if (elementLat && elementLng) {
-          const distance_km = calculateDistance(lat, lng, elementLat, elementLng)
-          distance = `~${distance_km.toFixed(1)}km`
-        }
+        const elementLat = el.lat ?? el.center?.lat
+        const elementLng = el.lon ?? el.center?.lon
+
+        const distanceKm =
+          typeof elementLat === 'number' && typeof elementLng === 'number'
+            ? calculateDistance(lat, lng, elementLat, elementLng)
+            : 0
+
+        const street = el.tags['addr:street']
+        const houseNumber = el.tags['addr:housenumber']
+        const city = el.tags['addr:city']
+        const addressParts = [
+          [houseNumber, street].filter(Boolean).join(' '),
+          city,
+        ].filter(Boolean)
 
         return {
           name: el.tags.name,
-          distance,
-          address: el.tags['addr:street'] || el.tags['addr:full'] || el.tags['addr:city'] || undefined,
-          phone: el.tags.phone,
-          website: el.tags.website,
+          distance: `${distanceKm.toFixed(1)} km`,
+          distanceKm,
+          address:
+            addressParts.join(', ') ||
+            el.tags['addr:full'] ||
+            undefined,
+          phone: el.tags.phone || el.tags['contact:phone'] || undefined,
+          website: el.tags.website || el.tags['contact:website'] || undefined,
+          lat: elementLat,
+          lng: elementLng,
+          serviceType,
         }
       })
-      .sort((a, b) => {
-        const aNum = parseFloat(a.distance)
-        const bNum = parseFloat(b.distance)
-        return aNum - bNum
-      })
-      .slice(0, 10)
+      .filter((s: NearbyService) => typeof s.lat === 'number' && typeof s.lng === 'number')
+      .sort((a: NearbyService, b: NearbyService) => a.distanceKm - b.distanceKm)
+      .slice(0, 20)
 
     return services
   } catch (error) {
@@ -293,6 +344,29 @@ export async function getLocationFromIP(): Promise<{ country: string; city: stri
       lat: data.latitude,
       lng: data.longitude,
     }
+  } catch {
+    return null
+  }
+}
+
+// Reverse geocoding via OpenStreetMap Nominatim - turn coordinates into a place name
+export async function reverseGeocode(
+  lat: number,
+  lng: number
+): Promise<{ label: string; city?: string; country?: string } | null> {
+  try {
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=14`,
+      { headers: { 'User-Agent': 'NEXUS-AI-Service-Finder' } }
+    )
+    if (!response.ok) return null
+    const data = await response.json()
+    const addr = data.address || {}
+    const city =
+      addr.city || addr.town || addr.village || addr.suburb || addr.county
+    const country = addr.country
+    const label = [city, addr.state, country].filter(Boolean).join(', ') || data.display_name
+    return { label, city, country }
   } catch {
     return null
   }

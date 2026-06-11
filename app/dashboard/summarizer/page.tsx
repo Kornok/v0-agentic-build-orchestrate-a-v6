@@ -17,7 +17,6 @@ export default function SummarizerPage() {
   const [summaries, setSummaries] = useState<Summary[]>([])
   const [error, setError] = useState('')
   const [copied, setCopied] = useState<string | null>(null)
-  const [summarizingPreview, setSummarizingPreview] = useState('')
 
   // Fetch previous summaries on load
   useEffect(() => {
@@ -36,7 +35,6 @@ export default function SummarizerPage() {
   const handleSummarize = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    setSummarizingPreview('')
 
     if (!text.trim()) {
       setError('Please enter some text to summarize')
@@ -45,7 +43,7 @@ export default function SummarizerPage() {
 
     setLoading(true)
     try {
-      const response = await fetch('/api/summarize/stream', {
+      const response = await fetch('/api/summarize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text, summaryLength }),
@@ -59,21 +57,12 @@ export default function SummarizerPage() {
         return
       }
 
-      // Show preview while adding to list
-      const summary = data.summary || ''
-      let displayed = ''
-      for (let i = 0; i < summary.length; i += 2) {
-        displayed = summary.slice(0, i)
-        setSummarizingPreview(displayed)
-        await new Promise(resolve => setTimeout(resolve, 10))
-      }
-
       // Add to summaries list
       setSummaries([
         {
           id: data.id,
           original_text: text,
-          summary: summary,
+          summary: data.summary,
           created_at: data.createdAt,
         },
         ...summaries,
@@ -81,7 +70,6 @@ export default function SummarizerPage() {
 
       setText('')
       setSummaryLength('medium')
-      setSummarizingPreview('')
     } catch (err) {
       setError('Error: ' + (err instanceof Error ? err.message : 'Unknown error'))
     } finally {
@@ -163,17 +151,6 @@ export default function SummarizerPage() {
             )}
           </form>
         </div>
-
-        {/* Summarizing Preview */}
-        {summarizingPreview && (
-          <div className="bg-card border border-primary/20 rounded-lg p-6 mb-8 animate-pulse">
-            <h2 className="text-lg font-light text-foreground mb-4">Generated Summary</h2>
-            <p className="text-sm text-foreground leading-relaxed">
-              {summarizingPreview}
-              <span className="animate-blink">|</span>
-            </p>
-          </div>
-        )}
 
         {/* Previous Summaries */}
         {summaries.length > 0 && (

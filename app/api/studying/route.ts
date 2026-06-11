@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { generateFreeText, createFallbackResponse } from '@/lib/free-ai'
+import { generateFreeText } from '@/lib/free-ai'
 
 async function trySave(table: string, row: Record<string, unknown>) {
   try {
@@ -59,17 +59,11 @@ Answer: [Correct option]
       prompt = `Create comprehensive study material on the topic: "${topic}"`
     }
 
-    let studyMaterial: string
-    try {
-      studyMaterial = await generateFreeText({
-        prompt,
-        system: 'You are an expert tutor who creates clear, well-organized study material for students.',
-        temperature: 0.7,
-      })
-    } catch (err) {
-      console.error('AI generation failed, using fallback:', err)
-      studyMaterial = createFallbackResponse('study', topic, topic)
-    }
+    const studyMaterial = await generateFreeText({
+      prompt,
+      system: 'You are an expert tutor who creates clear, well-organized study material for students.',
+      temperature: 0.7,
+    })
 
     const saved = await trySave('study_sessions', {
       topic,
