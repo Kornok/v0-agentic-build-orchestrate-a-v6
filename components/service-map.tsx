@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
@@ -42,17 +42,37 @@ interface ServiceMapProps {
   zoom?: number
 }
 
+// MapContainer only reads `center`/`zoom` on first mount. This child component
+// uses the live map instance to recenter whenever the target location changes,
+// keeping the map view in sync with searched locations.
+function RecenterMap({ lat, lng, zoom }: { lat: number; lng: number; zoom: number }) {
+  const map = useMap()
+
+  useEffect(() => {
+    if (typeof lat === 'number' && typeof lng === 'number') {
+      map.setView([lat, lng], zoom, { animate: true })
+    }
+  }, [map, lat, lng, zoom])
+
+  return null
+}
+
 export function ServiceMap({ services, userLocation, center = { lat: 40.7128, lng: -74.006 }, zoom = 13 }: ServiceMapProps) {
   const [markerIcon] = useState(defaultIcon)
+
+  // The location the map should focus on: prefer the user/searched location.
+  const focusLat = typeof userLocation?.lat === 'number' ? userLocation.lat : center.lat
+  const focusLng = typeof userLocation?.lng === 'number' ? userLocation.lng : center.lng
 
   return (
     <div className="w-full h-96 rounded-lg overflow-hidden border border-border">
       <MapContainer
-        center={[userLocation?.lat || center.lat, userLocation?.lng || center.lng]}
+        center={[focusLat, focusLng]}
         zoom={zoom}
         style={{ height: '100%', width: '100%' }}
         className="rounded-lg"
       >
+        <RecenterMap lat={focusLat} lng={focusLng} zoom={zoom} />
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
