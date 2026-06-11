@@ -2,7 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { Languages, Calendar, BarChart3, Mic, AlertCircle, MapPin, ArrowRight, BookOpen, PenTool } from 'lucide-react'
+import { Languages, BarChart3, Mic, AlertCircle, MapPin, ArrowRight, BookOpen, PenTool } from 'lucide-react'
 
 export default function DashboardPage() {
   const features = [
@@ -23,12 +23,6 @@ export default function DashboardPage() {
       description: 'Translate text between multiple languages with high accuracy.',
       icon: Languages,
       href: '/dashboard/translator',
-    },
-    {
-      title: 'Schedule Manager',
-      description: 'Create and manage your schedule intelligently with smart reminders.',
-      icon: Calendar,
-      href: '/dashboard/scheduler',
     },
     {
       title: 'Reports Generator',
