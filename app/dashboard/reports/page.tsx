@@ -2,6 +2,12 @@
 
 import React, { useState, useEffect } from 'react'
 import { Copy, Loader, Trash2, BarChart3, Download } from 'lucide-react'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+
+interface ChartDataPoint {
+  name: string
+  value: number
+}
 
 interface Report {
   id: string
@@ -9,6 +15,8 @@ interface Report {
   content: string
   report_type: string
   generated_at: string
+  chartData?: ChartDataPoint[]
+  chartDescription?: string
 }
 
 const REPORT_TYPES = {
@@ -74,6 +82,8 @@ export default function ReportsPage() {
           content: data.content,
           report_type: reportType,
           generated_at: data.createdAt,
+          chartData: data.chartData,
+          chartDescription: data.chartDescription,
         },
         ...reports,
       ])
@@ -119,7 +129,7 @@ export default function ReportsPage() {
 
   return (
     <div className="min-h-screen bg-background p-8">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-4">
@@ -128,7 +138,7 @@ export default function ReportsPage() {
             </div>
             <div>
               <h1 className="text-3xl font-light text-foreground">Reports Generator</h1>
-              <p className="text-sm text-muted-foreground mt-1">Create professional reports instantly</p>
+              <p className="text-sm text-muted-foreground mt-1">Create professional reports with visualizations</p>
             </div>
           </div>
         </div>
@@ -199,11 +209,11 @@ export default function ReportsPage() {
         {reports.length > 0 && (
           <div>
             <h2 className="text-xl font-light text-foreground mb-4">Generated Reports</h2>
-            <div className="space-y-4">
+            <div className="space-y-6">
               {reports.map((report) => (
                 <div key={report.id} className="bg-card border border-border rounded-lg p-6">
-                  <div className="mb-4">
-                    <div className="flex items-start justify-between mb-2">
+                  <div className="mb-6">
+                    <div className="flex items-start justify-between mb-4">
                       <div>
                         <h3 className="text-lg font-light text-foreground">{report.title}</h3>
                         <p className="text-xs text-muted-foreground">
@@ -211,6 +221,34 @@ export default function ReportsPage() {
                         </p>
                       </div>
                     </div>
+
+                    {/* Chart Section */}
+                    {report.chartData && report.chartData.length > 0 && (
+                      <div className="mb-6 p-4 bg-background rounded-lg border border-border/50">
+                        <div className="mb-4">
+                          <h4 className="text-sm font-light text-foreground mb-2">Performance Metrics</h4>
+                          {report.chartDescription && (
+                            <p className="text-sm text-muted-foreground">{report.chartDescription}</p>
+                          )}
+                        </div>
+                        <ResponsiveContainer width="100%" height={300}>
+                          <BarChart data={report.chartData}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                            <XAxis dataKey="name" stroke="var(--muted-foreground)" />
+                            <YAxis stroke="var(--muted-foreground)" />
+                            <Tooltip
+                              contentStyle={{
+                                backgroundColor: 'var(--background)',
+                                border: '1px solid var(--border)',
+                                borderRadius: '0.5rem',
+                              }}
+                              labelStyle={{ color: 'var(--foreground)' }}
+                            />
+                            <Bar dataKey="value" fill="var(--primary)" radius={[8, 8, 0, 0]} />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    )}
 
                     <div className="bg-background rounded-lg p-4 max-h-48 overflow-y-auto">
                       <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">

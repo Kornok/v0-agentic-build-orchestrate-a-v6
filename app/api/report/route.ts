@@ -20,6 +20,19 @@ async function trySave(table: string, row: Record<string, unknown>) {
   }
 }
 
+function generateMockChartData(title: string, reportType: string): Array<{ name: string; value: number }> {
+  const categories = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
+  return categories.map((name) => ({
+    name,
+    value: Math.floor(Math.random() * 100) + 20,
+  }))
+}
+
+function generateMockDescription(title: string, reportType: string): string {
+  const typeLabel = REPORT_TYPES[reportType as keyof typeof REPORT_TYPES] || 'General'
+  return `This ${typeLabel.toLowerCase()} for "${title}" shows key performance metrics and trends. The data reveals important insights that can guide strategic decision-making and operational improvements.`
+}
+
 function generateMockReport(title: string, content: string, reportType: string): string {
   const typeLabel = REPORT_TYPES[reportType as keyof typeof REPORT_TYPES] || 'General'
 
@@ -95,15 +108,22 @@ Please format the report professionally with sections, bullet points, and clear 
       generatedReport = generateMockReport(title, content, reportType)
     }
 
+    const chartData = generateMockChartData(title, reportType)
+    const chartDescription = generateMockDescription(title, reportType)
+
     const saved = await trySave('reports', {
       title,
       content: generatedReport,
       report_type: reportType,
+      chart_data: JSON.stringify(chartData),
+      chart_description: chartDescription,
     })
 
     return Response.json({
       id: saved?.id ?? crypto.randomUUID(),
       content: generatedReport,
+      chartData,
+      chartDescription,
       createdAt: saved?.generated_at ?? new Date().toISOString(),
     })
   } catch (error) {
@@ -123,7 +143,13 @@ export async function GET() {
 
     if (error) return Response.json({ reports: [], reportTypes: REPORT_TYPES })
 
-    return Response.json({ reports: data, reportTypes: REPORT_TYPES })
+    const processedReports = data.map((report: any) => ({
+      ...report,
+      chartData: report.chart_data ? JSON.parse(report.chart_data) : [],
+      chartDescription: report.chart_description || '',
+    }))
+
+    return Response.json({ reports: processedReports, reportTypes: REPORT_TYPES })
   } catch {
     return Response.json({ reports: [], reportTypes: REPORT_TYPES })
   }
