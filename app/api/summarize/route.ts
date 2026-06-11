@@ -1,8 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { generateText } from 'ai'
-
-// Free, zero-config via Vercel AI Gateway - no API key required
-const MODEL = 'openai/gpt-5-mini'
+import { generateFreeText, extractiveSummary } from '@/lib/free-ai'
 
 // Best-effort DB persistence: never let a missing/unconfigured database
 // break the core feature. Returns the saved row, or null if unavailable.
@@ -26,24 +23,34 @@ export async function POST(request: Request) {
     }
 
     const lengthInstructions = {
-      short: 'Create a 2-3 sentence summary.',
+      short: 'Create a concise 2-3 sentence summary.',
       medium: 'Create a 4-6 sentence summary.',
-      long: 'Create a 8-10 sentence summary.',
+      long: 'Create a detailed 8-10 sentence summary.',
     }
 
-    const prompt = `You are an expert summarizer. ${lengthInstructions[summaryLength as keyof typeof lengthInstructions] || lengthInstructions.medium}
+    const sentenceCounts = { short: 2, medium: 5, long: 9 }
+
+    const prompt = `${lengthInstructions[summaryLength as keyof typeof lengthInstructions] || lengthInstructions.medium}
 
 Text to summarize:
 ${text}
 
-Please provide a clear, concise summary that captures the main points.`
+Provide a clear, concise summary that captures the main points. Output only the summary.`
 
-    const { text: summary } = await generateText({
-      model: MODEL,
-      prompt,
-      temperature: 0.7,
-      maxOutputTokens: 500,
-    })
+    let summary: string
+    try {
+      summary = await generateFreeText({
+        prompt,
+        system: 'You are an expert summarizer. Respond only with the summary text.',
+        temperature: 0.5,
+      })
+    } catch {
+      // Fallback: local extractive summarization so the feature always works.
+      summary = extractiveSummary(
+        text,
+        sentenceCounts[summaryLength as keyof typeof sentenceCounts] || 5
+      )
+    }
 
     const saved = await trySave('document_summaries', {
       original_text: text,

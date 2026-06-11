@@ -1,8 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { generateText } from 'ai'
-
-// Free, zero-config via Vercel AI Gateway - no API key required
-const MODEL = 'openai/gpt-5-mini'
+import { generateFreeText } from '@/lib/free-ai'
 
 const REPORT_TYPES = {
   summary: 'Executive Summary',
@@ -38,11 +35,10 @@ Content: ${content}
 
 Please format the report professionally with sections, bullet points, and clear formatting. Use markdown formatting.`
 
-    const { text: generatedReport } = await generateText({
-      model: MODEL,
+    const generatedReport = await generateFreeText({
       prompt,
-      temperature: 0.7,
-      maxOutputTokens: 2000,
+      system: 'You are a professional analyst who writes clear, well-formatted reports in markdown.',
+      temperature: 0.6,
     })
 
     const saved = await trySave('reports', {

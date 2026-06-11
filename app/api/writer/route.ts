@@ -1,8 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { generateText } from 'ai'
-
-// Free, zero-config via Vercel AI Gateway - no API key required
-const MODEL = 'openai/gpt-5-mini'
+import { generateFreeText } from '@/lib/free-ai'
 
 async function trySave(table: string, row: Record<string, unknown>) {
   try {
@@ -59,11 +56,10 @@ Requirements:
 
 Write the complete document:`
 
-    const { text: content } = await generateText({
-      model: MODEL,
+    const content = await generateFreeText({
       prompt,
+      system: 'You are a skilled professional writer. Produce well-structured, polished documents.',
       temperature: 0.7,
-      maxOutputTokens: 3000,
     })
 
     const saved = await trySave('written_documents', {

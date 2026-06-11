@@ -1,9 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
-import { generateText } from 'ai'
+import { translateFree } from '@/lib/free-ai'
 
-// Free, zero-config via Vercel AI Gateway - no API key required
-const MODEL = 'openai/gpt-5-mini'
-
+// Free, keyless translation via MyMemory. No API key required.
 const SUPPORTED_LANGUAGES = {
   en: 'English',
   es: 'Spanish',
@@ -46,29 +44,10 @@ export async function POST(request: Request) {
     }
 
     if (sourceLanguage === targetLanguage) {
-      return Response.json(
-        { error: 'Source and target languages cannot be the same' },
-        { status: 400 }
-      )
+      return Response.json({ translatedText: text, id: crypto.randomUUID(), createdAt: new Date().toISOString() })
     }
 
-    const sourceLangName =
-      SUPPORTED_LANGUAGES[sourceLanguage as keyof typeof SUPPORTED_LANGUAGES] || sourceLanguage
-    const targetLangName =
-      SUPPORTED_LANGUAGES[targetLanguage as keyof typeof SUPPORTED_LANGUAGES] || targetLanguage
-
-    const prompt = `You are a professional translator. Translate the following text from ${sourceLangName} to ${targetLangName}. 
-Provide only the translated text without any explanations or additional text.
-
-Text to translate:
-${text}`
-
-    const { text: translation } = await generateText({
-      model: MODEL,
-      prompt,
-      temperature: 0.3,
-      maxOutputTokens: 2000,
-    })
+    const translation = await translateFree(text, sourceLanguage, targetLanguage)
 
     const saved = await trySave('translations', {
       original_text: text,
@@ -83,7 +62,7 @@ ${text}`
       createdAt: saved?.created_at ?? new Date().toISOString(),
     })
   } catch (error) {
-    console.error('Error:', error)
+    console.error('Translate error:', error)
     return Response.json({ error: 'Failed to translate text' }, { status: 500 })
   }
 }
