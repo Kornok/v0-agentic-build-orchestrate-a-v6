@@ -3,7 +3,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Languages, Calendar, BarChart3, Mic, AlertCircle, MapPin, Home, BookOpen, PenTool } from 'lucide-react'
+import { Languages, BarChart3, Mic, AlertCircle, MapPin, Home, BookOpen, PenTool } from 'lucide-react'
 
 export default function DashboardLayout({
   children,
@@ -17,7 +17,6 @@ export default function DashboardLayout({
     { name: 'Studying', href: '/dashboard/studying', icon: BookOpen },
     { name: 'Document Writer', href: '/dashboard/writer', icon: PenTool },
     { name: 'Translator', href: '/dashboard/translator', icon: Languages },
-    { name: 'Scheduler', href: '/dashboard/scheduler', icon: Calendar },
     { name: 'Reports', href: '/dashboard/reports', icon: BarChart3 },
     { name: 'Voice Assistant', href: '/dashboard/voice-assistant', icon: Mic },
     { name: 'Emergency Info', href: '/dashboard/emergency', icon: AlertCircle },
